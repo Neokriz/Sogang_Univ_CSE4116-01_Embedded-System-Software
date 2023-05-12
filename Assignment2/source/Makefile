@@ -1,15 +1,26 @@
 #CROSS_COMPILER = arm-none-linux-gnueabi-
-CC = $(CROSS_COMPILER)gcc
-CFLAGS = -static -Wall
+#CC = $(CROSS_COMPILER)gcc
+#CFLAGS = -static -Wall
 #DEPS = hw2_20171660.h
-OBJS = main.o
-TARGET = app 
 
-all: $(TARGET)
+obj-m	:= dev_driver.o
+KDIR	:=/work/achroimx_kernel
+PWD		:=$(shell pwd)
 
-$(TARGET): $(OBJS) 
-	$(CC) $(CFLAGS) -o $@ $(OBJS)
+all: driver app 
+
+driver: 
+	$(MAKE) -C $(KDIR) SUBDIRS=$(PWD) modules ARCH=arm
+
+app:  
+	arm-none-linux-gnueabi-gcc -static -Wall -o app main.c 
 
 clean:
-	rm -f $(wildcard *.o)
-	rm -f $(TARGET)
+	rm -rf *.ko
+	rm -rf *.o
+	rm -rf *.mod.*
+	rm -rf *.cmd
+	rm -rf Module.symvers
+	rm -rf modules.order
+	rm -rf .tmp*
+	rm -rf app

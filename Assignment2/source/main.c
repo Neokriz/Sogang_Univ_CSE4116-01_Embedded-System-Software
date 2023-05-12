@@ -1,11 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+
+#define FPGA_DEV_DEVICE "/dev/dev_driver"
 
 int main(int argc, char **argv) {
 	int timer_interval, timer_cnt;
 	char *timer_init; 
 	int err, len, zero, symbol;
+	int dev;
+	unsigned char retval;
 	int i;
 
 	err = 0; zero = 0, symbol = 0;
@@ -70,6 +79,19 @@ int main(int argc, char **argv) {
 		printf("Arguments confirmed: %3d %3d  %s\n", timer_interval, timer_cnt, timer_init);
 		printf("-------------------------------------------\n");
 	}
+
+	printf("log:device open\n");
+	dev = open(FPGA_DEV_DEVICE, O_WRONLY);
+	if(dev<0) {
+		printf("Device open error : %s\n", FPGA_DEV_DEVICE);
+		exit(1);
+	}
+
+	printf("log:write call\n");
+	retval = write(dev, timer_init, 4);
+	printf("log:write called\n");
+
+	close(dev);
 
 	free(timer_init);
 	return 0;
