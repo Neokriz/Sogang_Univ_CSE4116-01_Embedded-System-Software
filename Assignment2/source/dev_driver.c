@@ -152,15 +152,14 @@ ssize_t iom_dev_write(struct file *inode, char *gdata, size_t length, loff_t *of
 	outw(_s_value, (unsigned int)iom_fpga_fnd_addr);
 
 	
-	/*
-	str_size = sizeof(fpga_number[symbol_num]);	
-	memcpy(value_d, value, 10);
+	str_size = sizeof(fpga_number[symbol_num]);	// 10
+	memcpy(value_d, fpga_number[symbol_num], sizeof(char)*10);
 	// display code on DOT 
 	for(i=0; i<str_size; ++i) {
-		_s_value = value[i] & 0x7F;
+		//printk("%02x ", value_d[i]);//
+		_s_value = value_d[i] & 0x7F;
 		outw(_s_value, (unsigned int)iom_fpga_dot_addr+i*2);
 	}
-	*/
 
 	/*
 	value_t[TEXT_LENGTH] = 0;
