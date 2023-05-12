@@ -36,6 +36,7 @@
 #define IOM_TEXT_LCD_ADDRESS 0x08000090
 
 #define TEXT_LENGTH 32
+#define LINE_LENGTH 16 
 
 // Global variables
 static int fpga_led_port_usage = 0;
@@ -101,21 +102,22 @@ ssize_t iom_dev_write(struct file *inode, char *gdata, size_t length, loff_t *of
 	unsigned char value[4];
 	unsigned char value_d[10];
 	unsigned char value_t[33];
+
+	unsigned char my_num[9], my_name[14];
 	unsigned short _s_value;
 	unsigned short symbol_num;
 	unsigned short i;
 	const char *tmp = gdata;
-	char *my_num, *my_name;
 	int str_size;
 
+	value_t[0] = '\0';
 	symbol_num = 0;
-	my_num = my_name = NULL;
 
 	printk("log: iom_dev_write: [1]in write\n");
 	printk("log: iom_dev_write: [2]tmp : %s\n", tmp);
 
-	//strcpy(my_num, "20171660");
-	//strcpy(my_name, "Yoo Honghyeon");
+	strcpy(my_num, "20171660");
+	strcpy(my_name, "Yoo Honghyeon");
 
 	printk("log: iom_dev_write: [3]gdata : %s\n", gdata);
 
@@ -161,13 +163,21 @@ ssize_t iom_dev_write(struct file *inode, char *gdata, size_t length, loff_t *of
 		outw(_s_value, (unsigned int)iom_fpga_dot_addr+i*2);
 	}
 
-	/*
+	
+	printk("log: iom_dev_write: [5]strlen(my_num) : %d\n", strlen(my_num));
+	strcat(value_t, my_num);
+	memset(value_t+strlen(my_num), ' ', LINE_LENGTH-strlen(my_num));
+	strcat(value_t, my_name);
+	memset(value_t+LINE_LENGTH+strlen(my_name), ' ', LINE_LENGTH-strlen(my_name));
 	value_t[TEXT_LENGTH] = 0;
+	printk("log: iom_dev_write: [6]value_t : [%s]\n", value_t);
+	
 	for(i=0; i<TEXT_LENGTH; ++i) {
 		_s_value = ((value_t[i] & 0xFF) << 8) | (value_t[i + 1] & 0xFF);
 		outw(_s_value, (unsigned int)iom_fpga_text_lcd_addr+i);
+		i++;
 	}
-	*/
+
 
 	return length;
 };
