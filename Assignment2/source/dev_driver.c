@@ -13,9 +13,11 @@
 #include <linux/delay.h>
 #include <linux/ioport.h>
 #include <linux/version.h>
+#include <linux/uaccess.h>
 
 #include <asm/io.h>
 #include <asm/uaccess.h>
+#include <asm/param.h>
 
 // custom header for dot matrix
 #include "./fpga_dot_font.h"
@@ -42,18 +44,20 @@
 #define LINE_LENGTH 16 
 
 // Global variables
-static int fpga_led_port_usage = 0;
+/*static int fpga_led_port_usage = 0;
 static int fpga_fnd_port_usage = 0;
 static int fpga_dot_port_usage = 0;
-static int fpga_text_lcd_port_usage = 0;
+static int fpga_text_lcd_port_usage = 0; */
+static int fpga_multi_dev_usage = 0;
 
 static unsigned char *iom_fpga_led_addr;
 static unsigned char *iom_fpga_fnd_addr;
 static unsigned char *iom_fpga_dot_addr;
 static unsigned char *iom_fpga_text_lcd_addr;
 
-short _timer_interval;
-short _timer_cnt; 
+int _timer_interval;
+int _timer_cnt; 
+unsigned char _timer_init[5]; 
 
 // define functions...
 ssize_t iom_dev_write(struct file *inode, const char *gdata, size_t length, loff_t *off_what);
@@ -63,6 +67,7 @@ int iom_dev_release(struct inode *minode, struct file *mfile);
 
 // when devices open, call this function
 int iom_dev_open(struct inode *minode, struct file *mfile) {
+	/*
 	if(fpga_led_port_usage != 0 || \
 	   fpga_fnd_port_usage != 0 || \
 	   fpga_dot_port_usage != 0 || \
@@ -72,16 +77,24 @@ int iom_dev_open(struct inode *minode, struct file *mfile) {
 	fpga_fnd_port_usage = 1;
 	fpga_dot_port_usage = 1;
 	fpga_text_lcd_port_usage = 1;
+	*/
+	if(fpga_multi_dev_usage != 0)
+		return -EBUSY;
+
+	fpga_multi_dev_usage = 1;
 
 	return 0;
 };
 
 // when devices close, call this function
 int iom_dev_release(struct inode *minode, struct file *mfile) {
+	/*
 	fpga_led_port_usage = 0;
 	fpga_fnd_port_usage = 0;
 	fpga_dot_port_usage = 0;
 	fpga_text_lcd_port_usage = 0;
+	*/
+	fpga_multi_dev_usage = 1;
 
 	return 0;
 };
@@ -96,12 +109,9 @@ ssize_t iom_dev_write(struct file *inode, const char *gdata, size_t length, loff
 	 * 	in this module, gdata came in as char[4]
 	 */
 
-	unsigned char msg[13];
 	unsigned char value[4];
 	unsigned char value_d[10];
 	unsigned char value_t[33];
-	unsigned char *in_msg = msg;
-	unsigned char *str;
 
 	unsigned char my_num[9], my_name[14];
 	unsigned short _s_value;
@@ -110,7 +120,8 @@ ssize_t iom_dev_write(struct file *inode, const char *gdata, size_t length, loff
 	const char *tmp = gdata;
 	int str_size;
 
-	value_t[0] = '\0';
+	//value_t[0] = '\0';
+	memset(value_t, 0x00, TEXT_LENGTH);
 	symbol_num = 0;
 
 	printk("log: iom_dev_write: [1]in write\n");
@@ -121,8 +132,11 @@ ssize_t iom_dev_write(struct file *inode, const char *gdata, size_t length, loff
 
 	printk("log: iom_dev_write: [3]gdata : %s\n", gdata);
 
+	/*
 	if(copy_from_user(&msg, tmp, length))
 		return -EFAULT;
+	*/
+	strncpy(value, tmp, length);
 
 	// convert symbol to integer
 	for(i=0; i<4; ++i) {
@@ -195,6 +209,7 @@ long iom_dev_ioctl(struct file *inode, unsigned int ioctl_num, unsigned long ioc
 			char *in_msg = msg; 
 			char *str;
 			int len = 13;
+			int argument_num = 0;
 			
 			if(copy_from_user(&msg, tmp, sizeof(char)*len))
 				return -EFAULT;
@@ -204,15 +219,36 @@ long iom_dev_ioctl(struct file *inode, unsigned int ioctl_num, unsigned long ioc
 			str = in_msg;
 			while(str != NULL) {
 				str = strsep(&in_msg, " ");
-				if((str != NULL) && strcmp("", str))
+				if((str != NULL) && strcmp("", str)) {
 					printk("log: iom_dev_ioctl: [n]str: [%s]\n", str);
-					
+					argument_num++;
+					switch(argument_num) {
+					case 1:
+						//_timer_interval = atoi(str);
+						if(kstrtoint(str, 10, &_timer_interval) != 0) {
+							printk("kstrtoint failed\n");
+							return -1;
+						}
+						break;
+					case 2:
+						//_timer_cnt = atoi(str);
+						if(kstrtoint(str, 10, &_timer_cnt) != 0) {
+							printk("kstrtoint failed\n");
+							return -1;
+						}
+						break;
+					case 3:
+						strcpy(_timer_init, str);	
+						break;
+					}
+				}
 			}
+			printk("log: iom_dev_ioctl: [2]_timer_interval:%d,_timer_cnt:%d,_timer_init:%s\n", _timer_interval, _timer_cnt, _timer_init);
 
 			//strncpy(value, str, 4);
 
-
-			//iom_dev_write(inode, (char __user *)ioctl_param, len, NULL);
+			len = strlen(_timer_init);
+			iom_dev_write(inode, _timer_init, len, NULL);
 			break;
 		}
 		case COMMAND: {
