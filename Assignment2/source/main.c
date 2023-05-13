@@ -5,16 +5,22 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <sys/ioctl.h>
+
+#include "dev.h"
 
 
 #define FPGA_DEV_DEVICE "/dev/dev_driver"
 
+int ioctl_set_option(int, char*);
+
 int main(int argc, char **argv) {
-	int timer_interval, timer_cnt;
+	unsigned char ret_val;
 	char *timer_init; 
+	char msg[13] = {0x00};
+	int timer_interval, timer_cnt;
 	int err, len, zero, symbol;
 	int dev;
-	unsigned char retval;
 	int i;
 
 	err = 0; zero = 0, symbol = 0;
@@ -53,7 +59,7 @@ int main(int argc, char **argv) {
 			symbol = -1;
 	}
 
-	if((len < 4) || (len > 5)) {
+	if((len < 4) || (len > 4)) {
 		printf("[ERR]Third argument invalid.\n");
 		printf("\t\tTIMER_INIT must be 4 digit code.\n");
 		err = 1;
@@ -76,23 +82,41 @@ int main(int argc, char **argv) {
 		exit(1);
 	else {
 		printf("-------------------------------------------\n");
-		printf("Arguments confirmed: %3d %3d  %s\n", timer_interval, timer_cnt, timer_init);
+		printf("Arguments confirmed: %3d %3d %s\n", timer_interval, timer_cnt, timer_init);
+		sprintf(msg, "%3d %3d %s", timer_interval, timer_cnt, timer_init);
 		printf("-------------------------------------------\n");
 	}
 
 	printf("log:device open\n");
-	dev = open(FPGA_DEV_DEVICE, O_WRONLY);
+	//dev = open(FPGA_DEV_DEVICE, O_WRONLY);
+	dev = open(FPGA_DEV_DEVICE, O_RDWR);
 	if(dev<0) {
 		printf("Device open error : %s\n", FPGA_DEV_DEVICE);
 		exit(1);
 	}
 
 	printf("log:write call\n");
-	retval = write(dev, timer_init, 4);
+	//ret_val = write(dev, timer_init, 4);
+	ret_val = ioctl_set_option(dev, msg);
+	
 	printf("log:write called\n");
 
 	close(dev);
 
 	free(timer_init);
-	return 0;
+
+	return ret_val;
+}
+
+int ioctl_set_option(int fd, char *message) {
+	int ret_val;
+	
+	ret_val = ioctl(fd, SET_OPTION, message);
+
+	printf("log:ioctl_set_option [1]message:%s\n", message);
+
+	if(ret_val < 0)
+		printf("log:ioctl_set_option failed:%d\n", ret_val);
+
+	return ret_val;
 }

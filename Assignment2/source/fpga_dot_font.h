@@ -1,7 +1,7 @@
 /* This file is FPGA-DOT MATRIX font file.
 	FILE : fpga_dot_font.h
 	AUTH : Hong, Sung-Hyun
-		Huins, Inc */
+	Huins, Inc */
 		
 #ifndef __FPGA_NUMBER__
 #define __FPGA_NUMBER__

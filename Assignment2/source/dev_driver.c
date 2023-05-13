@@ -3,6 +3,7 @@
  * FILE : fpga_dev_driver.c
  * AUTH : neo7k@sogang.ac.kr */
 
+#include <linux/string.h>
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/fs.h>
@@ -18,6 +19,8 @@
 
 // custom header for dot matrix
 #include "./fpga_dot_font.h"
+
+#include "./dev.h"
 
 // ioboard fpga device major numbers
 #define IOM_DEV_MAJOR 242
@@ -49,20 +52,14 @@ static unsigned char *iom_fpga_fnd_addr;
 static unsigned char *iom_fpga_dot_addr;
 static unsigned char *iom_fpga_text_lcd_addr;
 
+short _timer_interval;
+short _timer_cnt; 
+
 // define functions...
-ssize_t iom_dev_write(struct file *inode, char *gdata, size_t length, loff_t *off_what);
+ssize_t iom_dev_write(struct file *inode, const char *gdata, size_t length, loff_t *off_what);
 ssize_t iom_dev_read(struct file *inode, char *gdata, size_t length, loff_t *off_what);
 int iom_dev_open(struct inode *minode, struct file *mfile);
 int iom_dev_release(struct inode *minode, struct file *mfile);
-
-// define file_operations structure
-struct file_operations iom_dev_fops = {
-	.owner		=	THIS_MODULE,
-	.open		=	iom_dev_open,
-	.write		=	iom_dev_write,
-	.read		=	iom_dev_read,
-	.release	=	iom_dev_release, 
-};
 
 // when devices open, call this function
 int iom_dev_open(struct inode *minode, struct file *mfile) {
@@ -89,7 +86,7 @@ int iom_dev_release(struct inode *minode, struct file *mfile) {
 	return 0;
 };
 
-ssize_t iom_dev_write(struct file *inode, char *gdata, size_t length, loff_t *off_what) {
+ssize_t iom_dev_write(struct file *inode, const char *gdata, size_t length, loff_t *off_what) {
 	/* value of each original driver :
 	 * 	led - char
 	 * 	fnd - char[4]
@@ -99,9 +96,12 @@ ssize_t iom_dev_write(struct file *inode, char *gdata, size_t length, loff_t *of
 	 * 	in this module, gdata came in as char[4]
 	 */
 
+	unsigned char msg[13];
 	unsigned char value[4];
 	unsigned char value_d[10];
 	unsigned char value_t[33];
+	unsigned char *in_msg = msg;
+	unsigned char *str;
 
 	unsigned char my_num[9], my_name[14];
 	unsigned short _s_value;
@@ -121,7 +121,7 @@ ssize_t iom_dev_write(struct file *inode, char *gdata, size_t length, loff_t *of
 
 	printk("log: iom_dev_write: [3]gdata : %s\n", gdata);
 
-	if(copy_from_user(&value, tmp, length))
+	if(copy_from_user(&msg, tmp, length))
 		return -EFAULT;
 
 	// convert symbol to integer
@@ -178,13 +178,59 @@ ssize_t iom_dev_write(struct file *inode, char *gdata, size_t length, loff_t *of
 		i++;
 	}
 
-
 	return length;
 };
 
 ssize_t iom_dev_read(struct file *inode, char *gdata, size_t length, loff_t *off_what) {
 
 	return length;
+};
+
+long iom_dev_ioctl(struct file *inode, unsigned int ioctl_num, unsigned long ioctl_param) {
+	// switch according to the ioctl called.
+	switch(ioctl_num) {
+		case SET_OPTION: {
+			char __user *tmp = (char __user *)ioctl_param;
+			char msg[13];
+			char *in_msg = msg; 
+			char *str;
+			int len = 13;
+			
+			if(copy_from_user(&msg, tmp, sizeof(char)*len))
+				return -EFAULT;
+
+			printk("log: iom_dev_ioctl: [1]msg : [%s]\n", msg);
+
+			str = in_msg;
+			while(str != NULL) {
+				str = strsep(&in_msg, " ");
+				if((str != NULL) && strcmp("", str))
+					printk("log: iom_dev_ioctl: [n]str: [%s]\n", str);
+					
+			}
+
+			//strncpy(value, str, 4);
+
+
+			//iom_dev_write(inode, (char __user *)ioctl_param, len, NULL);
+			break;
+		}
+		case COMMAND: {
+
+			break;
+		}
+	}
+	return 0;
+}
+
+// define file_operations structure
+struct file_operations iom_dev_fops = {
+	.owner		=	THIS_MODULE,
+	.open		=	iom_dev_open,
+	.release	=	iom_dev_release, 
+	.unlocked_ioctl = iom_dev_ioctl,
+	.read		=	iom_dev_read,
+	.write		=	iom_dev_write,
 };
 
 int __init iom_dev_init(void) {
