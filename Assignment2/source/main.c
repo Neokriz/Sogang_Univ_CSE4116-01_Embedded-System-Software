@@ -13,6 +13,7 @@
 #define FPGA_DEV_DEVICE "/dev/dev_driver"
 
 int ioctl_set_option(int, char*);
+int ioctl_command(int, int);
 
 int main(int argc, char **argv) {
 	unsigned char ret_val;
@@ -98,8 +99,10 @@ int main(int argc, char **argv) {
 	printf("log:write call\n");
 	//ret_val = write(dev, timer_init, 4);
 	ret_val = ioctl_set_option(dev, msg);
+
+	ret_val = ioctl_command(dev, 1);
 	
-	printf("log:write called\n");
+	//printf("log:write called\n");
 
 	close(dev);
 
@@ -117,6 +120,19 @@ int ioctl_set_option(int fd, char *message) {
 
 	if(ret_val < 0)
 		printf("log:ioctl_set_option failed:%d\n", ret_val);
+
+	return ret_val;
+}
+
+int ioctl_command(int fd, int cmd) {
+	int ret_val;
+	
+	ret_val = ioctl(fd, COMMAND, cmd);
+
+	printf("log:ioctl_command [1]cmd:%d\n", cmd);
+
+	if(ret_val < 0)
+		printf("log:ioctl_command failed:%d\n", ret_val);
 
 	return ret_val;
 }

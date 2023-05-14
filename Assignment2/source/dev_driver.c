@@ -43,6 +43,13 @@
 #define TEXT_LENGTH 32
 #define LINE_LENGTH 16 
 
+// user defined structure for timer
+static struct timer_with_counter {
+	struct timer_list timer;
+	struct file* inode;
+	int count;
+} dev_timer;
+
 // Global variables
 /*static int fpga_led_port_usage = 0;
 static int fpga_fnd_port_usage = 0;
@@ -64,6 +71,8 @@ ssize_t iom_dev_write(struct file *inode, const char *gdata, size_t length, loff
 ssize_t iom_dev_read(struct file *inode, char *gdata, size_t length, loff_t *off_what);
 int iom_dev_open(struct inode *minode, struct file *mfile);
 int iom_dev_release(struct inode *minode, struct file *mfile);
+
+static void kernel_timer_repeat(unsigned long);
 
 // when devices open, call this function
 int iom_dev_open(struct inode *minode, struct file *mfile) {
@@ -94,8 +103,8 @@ int iom_dev_release(struct inode *minode, struct file *mfile) {
 	fpga_dot_port_usage = 0;
 	fpga_text_lcd_port_usage = 0;
 	*/
-	fpga_multi_dev_usage = 1;
-
+	fpga_multi_dev_usage = 0;
+	
 	return 0;
 };
 
@@ -192,6 +201,8 @@ ssize_t iom_dev_write(struct file *inode, const char *gdata, size_t length, loff
 		i++;
 	}
 
+
+
 	return length;
 };
 
@@ -199,6 +210,25 @@ ssize_t iom_dev_read(struct file *inode, char *gdata, size_t length, loff_t *off
 
 	return length;
 };
+
+static void kernel_timer_repeat(unsigned long tdata) {
+	struct timer_with_counter *t_ptr = (struct timer_with_counter*)tdata; 
+	int len = strlen(_timer_init);
+
+	printk("log: kernel_timer_repeat %d\n", t_ptr->count);
+
+	iom_dev_write(dev_timer.inode, _timer_init, len, NULL);
+
+	t_ptr->count--;
+	if(t_ptr->count < 1)
+		return;
+
+	dev_timer.timer.expires = get_jiffies_64() + (_timer_interval * HZ)/10;
+	dev_timer.timer.data = (unsigned long)&dev_timer;
+	dev_timer.timer.function = kernel_timer_repeat;
+
+	add_timer(&dev_timer.timer);
+}
 
 long iom_dev_ioctl(struct file *inode, unsigned int ioctl_num, unsigned long ioctl_param) {
 	// switch according to the ioctl called.
@@ -214,7 +244,7 @@ long iom_dev_ioctl(struct file *inode, unsigned int ioctl_num, unsigned long ioc
 			if(copy_from_user(&msg, tmp, sizeof(char)*len))
 				return -EFAULT;
 
-			printk("log: iom_dev_ioctl: [1]msg : [%s]\n", msg);
+			//printk("log: iom_dev_ioctl: [1]msg : [%s]\n", msg);
 
 			str = in_msg;
 			while(str != NULL) {
@@ -247,11 +277,24 @@ long iom_dev_ioctl(struct file *inode, unsigned int ioctl_num, unsigned long ioc
 
 			//strncpy(value, str, 4);
 
-			len = strlen(_timer_init);
-			iom_dev_write(inode, _timer_init, len, NULL);
+			/*len = strlen(_timer_init);
+			 *iom_dev_write(inode, _timer_init, len, NULL);
+			 */
 			break;
 		}
 		case COMMAND: {
+
+			dev_timer.inode = inode;
+			dev_timer.count = _timer_cnt;
+			printk("log: iom_dev_ioctl: [3]dev_timer.count: %d\n", dev_timer.count);
+
+			del_timer_sync(&dev_timer.timer);
+			
+			dev_timer.timer.expires = get_jiffies_64() + (1 * HZ);
+			dev_timer.timer.data = (unsigned long)&dev_timer;
+			dev_timer.timer.function = kernel_timer_repeat;
+
+			add_timer(&dev_timer.timer);
 
 			break;
 		}
@@ -283,6 +326,8 @@ int __init iom_dev_init(void) {
 	iom_fpga_dot_addr = ioremap(IOM_DOT_ADDRESS, 0x10);
 	iom_fpga_text_lcd_addr = ioremap(IOM_TEXT_LCD_ADDRESS, 0x32);
 
+	init_timer(&(dev_timer.timer));
+
 	printk("init module, %s major number : %d\n", IOM_DEV_NAME, IOM_DEV_MAJOR);
 
 	return 0;
@@ -293,6 +338,10 @@ void __exit iom_dev_exit(void) {
 	iounmap(iom_fpga_fnd_addr);
 	iounmap(iom_fpga_dot_addr);
 	iounmap(iom_fpga_text_lcd_addr);
+	
+	printk("module exit\n\n");
+	fpga_multi_dev_usage = 0;
+	del_timer(&dev_timer.timer);
 
 	unregister_chrdev(IOM_DEV_MAJOR, IOM_DEV_NAME);
 }
