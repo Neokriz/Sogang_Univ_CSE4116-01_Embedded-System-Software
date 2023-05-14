@@ -41,7 +41,6 @@
 #define IOM_TEXT_LCD_ADDRESS 0x08000090
 
 #define TEXT_LENGTH 32
-#define LINE_LENGTH 16 
 
 // user defined structure for timer
 static struct timer_with_counter {
@@ -51,10 +50,6 @@ static struct timer_with_counter {
 } dev_timer;
 
 // Global variables
-/*static int fpga_led_port_usage = 0;
-static int fpga_fnd_port_usage = 0;
-static int fpga_dot_port_usage = 0;
-static int fpga_text_lcd_port_usage = 0; */
 static int fpga_multi_dev_usage = 0;
 
 static unsigned char *iom_fpga_led_addr;
@@ -79,17 +74,6 @@ static void kernel_timer_blank(unsigned long);
 
 // when devices open, call this function
 int iom_dev_open(struct inode *minode, struct file *mfile) {
-	/*
-	if(fpga_led_port_usage != 0 || \
-	   fpga_fnd_port_usage != 0 || \
-	   fpga_dot_port_usage != 0 || \
-	   fpga_text_lcd_port_usage != 0) return -EBUSY;
-
-	fpga_led_port_usage = 1;
-	fpga_fnd_port_usage = 1;
-	fpga_dot_port_usage = 1;
-	fpga_text_lcd_port_usage = 1;
-	*/
 	if(fpga_multi_dev_usage != 0)
 		return -EBUSY;
 
@@ -100,12 +84,6 @@ int iom_dev_open(struct inode *minode, struct file *mfile) {
 
 // when devices close, call this function
 int iom_dev_release(struct inode *minode, struct file *mfile) {
-	/*
-	fpga_led_port_usage = 0;
-	fpga_fnd_port_usage = 0;
-	fpga_dot_port_usage = 0;
-	fpga_text_lcd_port_usage = 0;
-	*/
 	fpga_multi_dev_usage = 0;
 	
 	return 0;
@@ -128,27 +106,28 @@ ssize_t iom_dev_write(struct file *inode, const char *gdata, size_t length, loff
 	unsigned char my_num[9], my_name[14];
 	unsigned short _s_value;
 	unsigned short symbol_num;
-	unsigned short i;
+	unsigned short i, j;
 	const char *tmp = gdata;
 	int str_size;
+	int order;
 
 	memset(value, 0x00, sizeof(char)*5);
 	memset(value_t, 0x00, TEXT_LENGTH);
-	symbol_num = 0;
+	symbol_num = 0; order = 0;
 
 	printk("log: iom_dev_write: [1]in write\n");
-	printk("log: iom_dev_write: [2]tmp : %s\n", tmp);
+	//printk("log: iom_dev_write: [2]tmp : %s\n", tmp);
 
 	strcpy(my_num, "20171660");
 	strcpy(my_name, "Yoo Honghyeon");
 
-	printk("log: iom_dev_write: [3]gdata : %s\n", gdata);
+	//printk("log: iom_dev_write: [3]gdata : %s\n", gdata);
 
-	/*
-	if(copy_from_user(&msg, tmp, length))
+	if(copy_from_user(&value, tmp, length))
 		return -EFAULT;
-	*/
-	strncpy(value, tmp, length);
+	//strncpy(value, tmp, length);
+
+
 	printk("log: iom_dev_write: [4]value : %s\n", value);
 
 	// convert symbol to integer
@@ -171,8 +150,8 @@ ssize_t iom_dev_write(struct file *inode, const char *gdata, size_t length, loff
 	_s_value = 256 >> symbol_num;
 	// light up led
 	outw(_s_value, (unsigned int)iom_fpga_led_addr);
-
 	
+
 	for(i=0; i<4; ++i)
 		value[i] -= 0x30;
 
@@ -180,7 +159,7 @@ ssize_t iom_dev_write(struct file *inode, const char *gdata, size_t length, loff
 	// display code on FND
 	outw(_s_value, (unsigned int)iom_fpga_fnd_addr);
 
-	
+
 	str_size = sizeof(fpga_number[symbol_num]);	// 10
 	if(symbol_num)
 		memcpy(value_d, fpga_number[symbol_num], sizeof(char)*str_size);
@@ -192,21 +171,46 @@ ssize_t iom_dev_write(struct file *inode, const char *gdata, size_t length, loff
 		_s_value = value_d[i] & 0x7F;
 		outw(_s_value, (unsigned int)iom_fpga_dot_addr+i*2);
 	}
+	
 
-	
-	printk("log: iom_dev_write: [6]strlen(my_num) : %d\n", strlen(my_num));
-	strcat(value_t, my_num);
-	memset(value_t+strlen(my_num), ' ', LINE_LENGTH-strlen(my_num));
-	strcat(value_t, my_name);
-	memset(value_t+LINE_LENGTH+strlen(my_name), ' ', LINE_LENGTH-strlen(my_name));
-	value_t[TEXT_LENGTH] = 0;
-	printk("log: iom_dev_write: [7]value_t : [%s]\n", value_t);
-	
+	//printk("log: iom_dev_write: [6]strlen(my_num) : %d\n", strlen(my_num));
+	if(symbol_num) {
+		order = _timer_cnt - dev_timer.count;
+		for(i=0; i<blank_upper[order % 16]; ++i)
+			value_t[i] = ' ';
+		for(j=0; j<strlen(my_num); ++i, ++j) 
+			value_t[i] = my_num[j]; 
+		for(j=0; j<(8 - blank_upper[order % 16]); ++i, ++j)
+			value_t[i] = ' ';
+		for(j=0; j<blank_lower[order % 6]; ++i, ++j)
+			value_t[i] = ' ';
+		for(j=0; j<strlen(my_name); ++i, ++j)
+			value_t[i] = my_name[j]; 
+		for(j=0; j<(3 - blank_lower[order % 6]); ++i, ++j)
+			value_t[i] = ' ';
+		value_t[TEXT_LENGTH] = 0;
+	}
+	else {
+		memset(value_t, ' ', TEXT_LENGTH+1);
+	}
+
+	// display on text_lcd
 	for(i=0; i<TEXT_LENGTH; ++i) {
 		_s_value = ((value_t[i] & 0xFF) << 8) | (value_t[i + 1] & 0xFF);
 		outw(_s_value, (unsigned int)iom_fpga_text_lcd_addr+i);
 		i++;
 	}
+
+
+	//printk("log: iom_dev_write: [7]value_t : [%s]\n", value_t);
+	printk("log: iom_dev_write: [7]value_t : [");
+	for(i=0; i<16; ++i)
+		printk("%c", value_t[i]);
+	printk("|");
+	for(i=16; i<32; ++i)
+		printk("%c", value_t[i]);
+	printk("]\n");
+
 
 	return length;
 };
@@ -216,6 +220,7 @@ ssize_t iom_dev_read(struct file *inode, char *gdata, size_t length, loff_t *off
 	return length;
 };
 
+// timer function that is called INIT_CNT times
 static void kernel_timer_repeat(unsigned long tdata) {
 	struct timer_with_counter *t_ptr = (struct timer_with_counter*)tdata; 
 	int len = strlen(_timer_init);
@@ -229,9 +234,9 @@ static void kernel_timer_repeat(unsigned long tdata) {
 	pos = (_init_pos + order / 8) % 4;
 	symbol_num = (_init_symbol - 1 + order) % 8;
 	iom_dev_write(dev_timer.inode, fnd_code[pos][symbol_num], len, NULL);
-	//iom_dev_write(dev_timer.inode, _timer_init, len, NULL);
 
 	t_ptr->count--;
+	// turn off(reset) devices 2 seconds after task finish. 
 	if(t_ptr->count < 1) {
 		dev_timer.timer.expires = get_jiffies_64() + (2 * HZ);
 		dev_timer.timer.data = (unsigned long)&dev_timer;
@@ -246,13 +251,14 @@ static void kernel_timer_repeat(unsigned long tdata) {
 	dev_timer.timer.function = kernel_timer_repeat;
 
 	add_timer(&dev_timer.timer);
+	printk("______________________________________________________________________\n");
 	return;
 }
 
 // reset(turn off) devices
 static void kernel_timer_blank(unsigned long tdata) {
 	char blank[5] = {0x30, 0x30, 0x30, 0x30, '\0'};
-
+	printk("______________________________________________________________________\n");
 	iom_dev_write(dev_timer.inode, blank, 4, NULL);
 	return;
 }
@@ -281,14 +287,12 @@ long iom_dev_ioctl(struct file *inode, unsigned int ioctl_num, unsigned long ioc
 					argument_num++;
 					switch(argument_num) {
 					case 1:
-						//_timer_interval = atoi(str);
 						if(kstrtoint(str, 10, &_timer_interval) != 0) {
 							printk("kstrtoint failed\n");
 							return -1;
 						}
 						break;
 					case 2:
-						//_timer_cnt = atoi(str);
 						if(kstrtoint(str, 10, &_timer_cnt) != 0) {
 							printk("kstrtoint failed\n");
 							return -1;
@@ -302,9 +306,6 @@ long iom_dev_ioctl(struct file *inode, unsigned int ioctl_num, unsigned long ioc
 			}
 			printk("log: iom_dev_ioctl: [2]_timer_interval:%d,_timer_cnt:%d,_timer_init:%s\n", _timer_interval, _timer_cnt, _timer_init);
 
-			/*len = strlen(_timer_init);
-			 *iom_dev_write(inode, _timer_init, len, NULL);
-			 */
 			break;
 		}
 		case COMMAND: {
