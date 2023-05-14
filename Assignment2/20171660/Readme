@@ -1,0 +1,35 @@
+2023-05-14.
+
+2023 SOGANG UNIVERSITY CSE4116-01 Embedded System Software
+
+Assignment 2.
+Written by 20171660 Yoo Honghyeon
+
+Project description:
+	Application - Get device running options from user.
+				  Use ioctl to set options and run devices.
+				  Two ioctl commands are SET_OPTION and COMMAND, defined in "dev.h".
+
+				  Application execute example
+				  		./app "TIMER_INTERVAL" "TIMER_CNT" "TIMER_INIT"
+						         [1 - 100]      [1 - 100]  [0001 - 8000]
+
+						TIMER_INTERVAL : HZ value 1-100 (0.1sec - 10sec).
+						TIMER_CNT : Number of device output change.
+						TIMER_INIT : Initial symbol and positon displaying on FND.
+
+
+	Timer device driver - Modified device driver that control 4 onboard devices(listed below).
+	
+						  Devices list = [LED, FND, DOT_MATRIX, TEXT_LCD]
+
+						  
+
+Environment info:
+	Compiler - ARM cross compiler
+			   arm-none-linux-gnueabi-gcc (Sourcery CodeBench Lite 2014.05-29) 4.8.3 20140320
+
+	Developed environment - Ununtu 20.04.1
+
+	Working environment - Embedded Platform (ACHRO - I.MX6Q)
+						  Linux kernel 3.0.35
