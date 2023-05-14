@@ -97,13 +97,10 @@ int main(int argc, char **argv) {
 	}
 
 	printf("log:write call\n");
-	//ret_val = write(dev, timer_init, 4);
 	ret_val = ioctl_set_option(dev, msg);
 
 	ret_val = ioctl_command(dev, 1);
 	
-	//printf("log:write called\n");
-
 	close(dev);
 
 	free(timer_init);

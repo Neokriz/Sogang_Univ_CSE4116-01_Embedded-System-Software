@@ -64,6 +64,8 @@ static unsigned char *iom_fpga_text_lcd_addr;
 
 int _timer_interval;
 int _timer_cnt; 
+int _init_pos;
+int _init_symbol;
 unsigned char _timer_init[5]; 
 
 // define functions...
@@ -73,6 +75,7 @@ int iom_dev_open(struct inode *minode, struct file *mfile);
 int iom_dev_release(struct inode *minode, struct file *mfile);
 
 static void kernel_timer_repeat(unsigned long);
+static void kernel_timer_blank(unsigned long);
 
 // when devices open, call this function
 int iom_dev_open(struct inode *minode, struct file *mfile) {
@@ -118,7 +121,7 @@ ssize_t iom_dev_write(struct file *inode, const char *gdata, size_t length, loff
 	 * 	in this module, gdata came in as char[4]
 	 */
 
-	unsigned char value[4];
+	unsigned char value[5];
 	unsigned char value_d[10];
 	unsigned char value_t[33];
 
@@ -129,7 +132,7 @@ ssize_t iom_dev_write(struct file *inode, const char *gdata, size_t length, loff
 	const char *tmp = gdata;
 	int str_size;
 
-	//value_t[0] = '\0';
+	memset(value, 0x00, sizeof(char)*5);
 	memset(value_t, 0x00, TEXT_LENGTH);
 	symbol_num = 0;
 
@@ -146,13 +149,14 @@ ssize_t iom_dev_write(struct file *inode, const char *gdata, size_t length, loff
 		return -EFAULT;
 	*/
 	strncpy(value, tmp, length);
+	printk("log: iom_dev_write: [4]value : %s\n", value);
 
 	// convert symbol to integer
 	for(i=0; i<4; ++i) {
 		if(value[i] != 0x30)
 			symbol_num = value[i] - 0x30;
 	}
-	printk("log: iom_dev_write: [4]symbol_num : %d\n", symbol_num);
+	printk("log: iom_dev_write: [5]symbol_num : %d\n", symbol_num);
 	/* number - led value mapping
 	 *   1		128  [1000 0000]
 	 *   2       64  [0100 0000]
@@ -178,7 +182,10 @@ ssize_t iom_dev_write(struct file *inode, const char *gdata, size_t length, loff
 
 	
 	str_size = sizeof(fpga_number[symbol_num]);	// 10
-	memcpy(value_d, fpga_number[symbol_num], sizeof(char)*10);
+	if(symbol_num)
+		memcpy(value_d, fpga_number[symbol_num], sizeof(char)*str_size);
+	else
+		memcpy(value_d, fpga_set_blank, sizeof(char)*str_size);
 	// display code on DOT 
 	for(i=0; i<str_size; ++i) {
 		//printk("%02x ", value_d[i]);//
@@ -187,21 +194,19 @@ ssize_t iom_dev_write(struct file *inode, const char *gdata, size_t length, loff
 	}
 
 	
-	printk("log: iom_dev_write: [5]strlen(my_num) : %d\n", strlen(my_num));
+	printk("log: iom_dev_write: [6]strlen(my_num) : %d\n", strlen(my_num));
 	strcat(value_t, my_num);
 	memset(value_t+strlen(my_num), ' ', LINE_LENGTH-strlen(my_num));
 	strcat(value_t, my_name);
 	memset(value_t+LINE_LENGTH+strlen(my_name), ' ', LINE_LENGTH-strlen(my_name));
 	value_t[TEXT_LENGTH] = 0;
-	printk("log: iom_dev_write: [6]value_t : [%s]\n", value_t);
+	printk("log: iom_dev_write: [7]value_t : [%s]\n", value_t);
 	
 	for(i=0; i<TEXT_LENGTH; ++i) {
 		_s_value = ((value_t[i] & 0xFF) << 8) | (value_t[i + 1] & 0xFF);
 		outw(_s_value, (unsigned int)iom_fpga_text_lcd_addr+i);
 		i++;
 	}
-
-
 
 	return length;
 };
@@ -214,20 +219,42 @@ ssize_t iom_dev_read(struct file *inode, char *gdata, size_t length, loff_t *off
 static void kernel_timer_repeat(unsigned long tdata) {
 	struct timer_with_counter *t_ptr = (struct timer_with_counter*)tdata; 
 	int len = strlen(_timer_init);
+	int order, pos, symbol_num;
+	
+	order = _timer_cnt - t_ptr->count;
+	symbol_num = 0;
 
 	printk("log: kernel_timer_repeat %d\n", t_ptr->count);
 
-	iom_dev_write(dev_timer.inode, _timer_init, len, NULL);
+	pos = (_init_pos + order / 8) % 4;
+	symbol_num = (_init_symbol - 1 + order) % 8;
+	iom_dev_write(dev_timer.inode, fnd_code[pos][symbol_num], len, NULL);
+	//iom_dev_write(dev_timer.inode, _timer_init, len, NULL);
 
 	t_ptr->count--;
-	if(t_ptr->count < 1)
-		return;
+	if(t_ptr->count < 1) {
+		dev_timer.timer.expires = get_jiffies_64() + (2 * HZ);
+		dev_timer.timer.data = (unsigned long)&dev_timer;
+		dev_timer.timer.function = kernel_timer_blank;
 
-	dev_timer.timer.expires = get_jiffies_64() + (_timer_interval * HZ)/10;
+		add_timer(&dev_timer.timer);
+		return;
+	}
+
+	dev_timer.timer.expires = get_jiffies_64() + (_timer_interval * HZ) / 10;
 	dev_timer.timer.data = (unsigned long)&dev_timer;
 	dev_timer.timer.function = kernel_timer_repeat;
 
 	add_timer(&dev_timer.timer);
+	return;
+}
+
+// reset(turn off) devices
+static void kernel_timer_blank(unsigned long tdata) {
+	char blank[5] = {0x30, 0x30, 0x30, 0x30, '\0'};
+
+	iom_dev_write(dev_timer.inode, blank, 4, NULL);
+	return;
 }
 
 long iom_dev_ioctl(struct file *inode, unsigned int ioctl_num, unsigned long ioctl_param) {
@@ -275,18 +302,26 @@ long iom_dev_ioctl(struct file *inode, unsigned int ioctl_num, unsigned long ioc
 			}
 			printk("log: iom_dev_ioctl: [2]_timer_interval:%d,_timer_cnt:%d,_timer_init:%s\n", _timer_interval, _timer_cnt, _timer_init);
 
-			//strncpy(value, str, 4);
-
 			/*len = strlen(_timer_init);
 			 *iom_dev_write(inode, _timer_init, len, NULL);
 			 */
 			break;
 		}
 		case COMMAND: {
+			int i;
+
+			for(i=0; i<4; ++i) {
+				if(_timer_init[i] != 0x30) {
+					_init_pos = i;
+					_init_symbol = _timer_init[i] - 0x30;
+					break;
+				}
+			}
+			printk("log: iom_dev_ioctl: [3]_init_pos: %d, _init_symbol: %d\n", _init_pos, _init_symbol);
 
 			dev_timer.inode = inode;
 			dev_timer.count = _timer_cnt;
-			printk("log: iom_dev_ioctl: [3]dev_timer.count: %d\n", dev_timer.count);
+			printk("log: iom_dev_ioctl: [4]dev_timer.count: %d\n", dev_timer.count);
 
 			del_timer_sync(&dev_timer.timer);
 			
