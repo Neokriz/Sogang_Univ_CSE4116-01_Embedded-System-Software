@@ -4,7 +4,7 @@
 
 #define MAJOR_NUM 242
 #define SET_OPTION _IOW(MAJOR_NUM, 0, char*)
-#define COMMAND _IOW(MAJOR_NUM, 1, int)
+#define COMMAND _IOW(MAJOR_NUM, 1, char*)
 
 unsigned char fnd_code[4][8][5] = {
 	{

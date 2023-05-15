@@ -13,12 +13,13 @@
 #define FPGA_DEV_DEVICE "/dev/dev_driver"
 
 int ioctl_set_option(int, char*);
-int ioctl_command(int, int);
+int ioctl_command(int, char*);
 
 int main(int argc, char **argv) {
 	unsigned char ret_val;
 	char *timer_init; 
 	char msg[13] = {0x00};
+	char command[3] = {0x00};
 	int timer_interval, timer_cnt;
 	int err, len, zero, symbol;
 	int dev;
@@ -26,6 +27,8 @@ int main(int argc, char **argv) {
 
 	err = 0; zero = 0, symbol = 0;
 	timer_init = NULL;
+	// set wait seconds after counter expired.
+	strcpy(command, "3");
 	
 	if(argc != 4) {
 		printf("[ERR]Number of arguments doesn't match.\n\n");
@@ -82,10 +85,10 @@ int main(int argc, char **argv) {
 	if(err == 1)
 		exit(1);
 	else {
-		printf("-------------------------------------------\n");
-		printf("Arguments confirmed: %3d %3d %s\n", timer_interval, timer_cnt, timer_init);
+		//printf("-------------------------------------------\n");
+		//printf("Arguments confirmed: %3d %3d %s\n", timer_interval, timer_cnt, timer_init);
 		sprintf(msg, "%3d %3d %s", timer_interval, timer_cnt, timer_init);
-		printf("-------------------------------------------\n");
+		//printf("-------------------------------------------\n");
 	}
 
 	printf("log:device open\n");
@@ -95,11 +98,11 @@ int main(int argc, char **argv) {
 		printf("Device open error : %s\n", FPGA_DEV_DEVICE);
 		exit(1);
 	}
-
-	printf("log:write call\n");
+	//printf("log:write call\n");
 	ret_val = ioctl_set_option(dev, msg);
-
-	ret_val = ioctl_command(dev, 1);
+	
+	if(!ret_val)
+		ret_val = ioctl_command(dev, command);
 	
 	close(dev);
 
@@ -113,7 +116,7 @@ int ioctl_set_option(int fd, char *message) {
 	
 	ret_val = ioctl(fd, SET_OPTION, message);
 
-	printf("log:ioctl_set_option [1]message:%s\n", message);
+	//printf("log:ioctl_set_option [1]message:%s\n", message);
 
 	if(ret_val < 0)
 		printf("log:ioctl_set_option failed:%d\n", ret_val);
@@ -121,12 +124,12 @@ int ioctl_set_option(int fd, char *message) {
 	return ret_val;
 }
 
-int ioctl_command(int fd, int cmd) {
+int ioctl_command(int fd, char* cmd) {
 	int ret_val;
 	
 	ret_val = ioctl(fd, COMMAND, cmd);
 
-	printf("log:ioctl_command [1]cmd:%d\n", cmd);
+	//printf("log:ioctl_command [1]cmd:%s\n", cmd);
 
 	if(ret_val < 0)
 		printf("log:ioctl_command failed:%d\n", ret_val);

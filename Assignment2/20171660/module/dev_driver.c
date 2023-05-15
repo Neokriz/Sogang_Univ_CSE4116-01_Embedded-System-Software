@@ -61,6 +61,7 @@ int _timer_interval;
 int _timer_cnt; 
 int _init_pos;
 int _init_symbol;
+int _command;
 unsigned char _timer_init[5]; 
 
 // define functions...
@@ -236,9 +237,10 @@ static void kernel_timer_repeat(unsigned long tdata) {
 	iom_dev_write(dev_timer.inode, fnd_code[pos][symbol_num], len, NULL);
 
 	t_ptr->count--;
-	// turn off(reset) devices 2 seconds after task finish. 
+	// turn off(reset) devices [_command] seconds after task finish. 
 	if(t_ptr->count < 1) {
-		dev_timer.timer.expires = get_jiffies_64() + (2 * HZ);
+		printk("\nCounter expired. Shutting down in %d seconds...\n", _command);
+		dev_timer.timer.expires = get_jiffies_64() + (_command * HZ);
 		dev_timer.timer.data = (unsigned long)&dev_timer;
 		dev_timer.timer.function = kernel_timer_blank;
 
@@ -283,18 +285,18 @@ long iom_dev_ioctl(struct file *inode, unsigned int ioctl_num, unsigned long ioc
 			while(str != NULL) {
 				str = strsep(&in_msg, " ");
 				if((str != NULL) && strcmp("", str)) {
-					printk("log: iom_dev_ioctl: [n]str: [%s]\n", str);
+					//printk("log: iom_dev_ioctl: [n]str: [%s]\n", str);
 					argument_num++;
 					switch(argument_num) {
 					case 1:
 						if(kstrtoint(str, 10, &_timer_interval) != 0) {
-							printk("kstrtoint failed\n");
+							//printk("kstrtoint failed\n");
 							return -1;
 						}
 						break;
 					case 2:
 						if(kstrtoint(str, 10, &_timer_cnt) != 0) {
-							printk("kstrtoint failed\n");
+							//printk("kstrtoint failed\n");
 							return -1;
 						}
 						break;
@@ -304,12 +306,22 @@ long iom_dev_ioctl(struct file *inode, unsigned int ioctl_num, unsigned long ioc
 					}
 				}
 			}
-			printk("log: iom_dev_ioctl: [2]_timer_interval:%d,_timer_cnt:%d,_timer_init:%s\n", _timer_interval, _timer_cnt, _timer_init);
+			printk("log: iom_dev_ioctl: [2]\n\t\t_timer_interval:%d,\n\t\t_timer_cnt:%d,\n\t\t_timer_init:%s\n", _timer_interval, _timer_cnt, _timer_init);
 
 			break;
 		}
 		case COMMAND: {
+			char __user *tmp = (char __user *)ioctl_param;
+			char c_arr[3];
 			int i;
+
+			if(copy_from_user(&c_arr, tmp, sizeof(char) * 3))
+				return -EFAULT;
+			if(kstrtoint(c_arr, 10, &_command) != 0) {
+				printk("kstrtoint failed\n");
+				return -1;
+			}
+			printk("log: iom_dev_ioctl: [3]_command: %d\n", _command);
 
 			for(i=0; i<4; ++i) {
 				if(_timer_init[i] != 0x30) {
@@ -318,15 +330,17 @@ long iom_dev_ioctl(struct file *inode, unsigned int ioctl_num, unsigned long ioc
 					break;
 				}
 			}
-			printk("log: iom_dev_ioctl: [3]_init_pos: %d, _init_symbol: %d\n", _init_pos, _init_symbol);
+			printk("log: iom_dev_ioctl: [4]_init_pos: %d, _init_symbol: %d\n", _init_pos, _init_symbol);
 
 			dev_timer.inode = inode;
 			dev_timer.count = _timer_cnt;
-			printk("log: iom_dev_ioctl: [4]dev_timer.count: %d\n", dev_timer.count);
+			printk("log: iom_dev_ioctl: [5]dev_timer.count: %d\n\n", dev_timer.count);
 
 			del_timer_sync(&dev_timer.timer);
 			
-			dev_timer.timer.expires = get_jiffies_64() + (1 * HZ);
+			//dev_timer.timer.expires = get_jiffies_64() + (1 * HZ);
+			printk("\nCounter set. Starting after %d seconds...\n", _command);
+			dev_timer.timer.expires = get_jiffies_64() + (_command * HZ);
 			dev_timer.timer.data = (unsigned long)&dev_timer;
 			dev_timer.timer.function = kernel_timer_repeat;
 
