@@ -1,68 +1,62 @@
-/* FPGA FND Test Application
-File : fpga_test_fnd.c
-Auth : largest@huins.com */
+/* Assignment3 Application
+File : main.c
+Auth : neo7k@sogang.ac.kr */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/ioctl.h>
 #include <fcntl.h>
-
 #include <string.h>
 
-#define MAX_DIGIT 4
-#define FND_DEVICE "/dev/stopwatch"
+#include "../module/stopwatch.h"
 
-int main(int argc, char **argv)
+#define MAX_DIGIT 4
+#define STOPWATCH_DEVICE "/dev/stopwatch"
+
+int ioctl_set_option(int, char*);
+int ioctl_command(int, char*);
+
+int main(void)
 {
 	int dev;
-	unsigned char data[4];
-	unsigned char retval;
-	int i;
-	int str_size;
+	char data[4];
+	unsigned char ret_val;
+	char command[2];
+	//int i;
+	//int str_size;
 
 
-	memset(data,0,sizeof(data));
+	memset(data,0x39,sizeof(data));
+	//memset(command,0x30,sizeof(command));
+	strcpy(command, "2");
 
-	if(argc!=2) {
-		printf("please input the parameter! \n");
-		printf("ex)./test_led a1\n");
-		return -1;
-	}
-
-    str_size=(strlen(argv[1]));
-    if(str_size>MAX_DIGIT)
-    {
-        printf("Warning! 4 Digit number only!\n");
-        str_size=MAX_DIGIT;
-    }
-
-    for(i=0;i<str_size;i++)
-    {
-        if((argv[1][i]<0x30)||(argv[1][i])>0x39) {
-            printf("Error! Invalid Value!\n");
-            return -1;
-        }
-        data[i]=argv[1][i]-0x30;
-    }
-
-
-    dev = open(FND_DEVICE, O_RDWR);
+    dev = open(STOPWATCH_DEVICE, O_RDWR);
     if (dev<0) {
-        printf("Device open error : %s\n",FND_DEVICE);
+        printf("log:stopwatch device open error : %s\n",STOPWATCH_DEVICE);
         exit(1);
     }
+	else
+		printf("< stopwatch device has been detected > \n");
 
-
-    retval=write(dev,&data,4);	
-    if(retval<0) {
-        printf("Write Error!\n");
-        return -1;
+	ret_val = ioctl_set_option(dev, data);
+    if(ret_val>-1) {
+		printf("---------------\n");
+		ret_val = ioctl_command(dev, command);
+	}
+	else
+		printf("\nret_val = %d\n", ret_val);
+	
+/*
+    ret_val=write(dev,&data,4);	
+    if(ret_val<0) {
+        printf("log:stopwatch write Error!\n");
+		exit(1);
     }
-
-	memset(data,0,sizeof(data));
-
+*/
+/*
 	sleep(1);
 
 	retval=read(dev,&data,4);
@@ -70,13 +64,31 @@ int main(int argc, char **argv)
 		printf("Read Error!\n");
 		return -1;
 	}
-
 	printf("Current FND Value : ");
 	for(i=0;i<str_size;i++)	
 		printf("%d",data[i]);
 	printf("\n");
-
+*/
 	close(dev);
 
 	return(0);
+}
+
+int ioctl_set_option(int fd, char *msg) {
+	int ret_val;
+
+	ret_val = ioctl(fd, SET_OPTION, msg);
+	if(ret_val<0)
+		printf("log:ioctl_set_option failed:%d\n", ret_val);
+
+	return ret_val;
+}
+int ioctl_command(int fd, char* cmd) {
+	int ret_val;
+	
+	ret_val = ioctl(fd, COMMAND, cmd);
+	if(ret_val < 0)
+		printf("log:ioctl_command failed:%d\n", ret_val);
+
+	return ret_val;
 }

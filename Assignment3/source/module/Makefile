@@ -1,6 +1,6 @@
 #Makefile for a basic kernel module
 
-obj-m   := stopwatch.o
+obj-m   := stopwatch_driver.o
 
 KDIR    :=/work/achroimx_kernel
 PWD     :=$(shell pwd)
