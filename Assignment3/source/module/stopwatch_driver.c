@@ -64,12 +64,12 @@ ssize_t stopwatch_read(struct file *inode, char *gdata, size_t length, loff_t *o
 //long stopwatch_ioctl(struct file *inode, unsigned int ioctl_num, unsigned long ioctl_param) {
 
 // interrupt handlers...
-irqreturn_t inter_handler_HM(int irq, void* dev_id, struct pt_regs* reg);
-irqreturn_t inter_handler_BK(int irq, void* dev_id, struct pt_regs* reg);
-irqreturn_t inter_handler_VP(int irq, void* dev_id, struct pt_regs* reg);
-irqreturn_t inter_handler_VM(int irq, void* dev_id, struct pt_regs* reg);
+irqreturn_t inter_handler_HM(int irq, void* dev_id);
+irqreturn_t inter_handler_BK(int irq, void* dev_id);
+irqreturn_t inter_handler_VP(int irq, void* dev_id);
+irqreturn_t inter_handler_VM(int irq, void* dev_id);
 
-irqreturn_t inter_handler_HM(int irq, void* dev_id, struct pt_regs* reg) {
+irqreturn_t inter_handler_HM(int irq, void* dev_id) {
 	printk(KERN_ALERT "interrupt HM!!! = %x\n", gpio_get_value(IMX_GPIO_NR(1, 11)));
 
 	if(++_interrupt_count>=3) {
@@ -82,19 +82,19 @@ irqreturn_t inter_handler_HM(int irq, void* dev_id, struct pt_regs* reg) {
 	return IRQ_HANDLED;
 }
 
-irqreturn_t inter_handler_BK(int irq, void* dev_id, struct pt_regs* reg) {
+irqreturn_t inter_handler_BK(int irq, void* dev_id) {
         printk(KERN_ALERT "interrupt BK!!! = %x\n", gpio_get_value(IMX_GPIO_NR(1, 12)));
 		stopwatch_write(_inode, "2222", DIGIT, NULL);
         return IRQ_HANDLED;
 }
 
-irqreturn_t inter_handler_VP(int irq, void* dev_id,struct pt_regs* reg) {
+irqreturn_t inter_handler_VP(int irq, void* dev_id) {
         printk(KERN_ALERT "interrupt VP!!! = %x\n", gpio_get_value(IMX_GPIO_NR(2, 15)));
 		stopwatch_write(_inode, "3333", DIGIT, NULL);
         return IRQ_HANDLED;
 }
 
-irqreturn_t inter_handler_VM(int irq, void* dev_id, struct pt_regs* reg) {
+irqreturn_t inter_handler_VM(int irq, void* dev_id) {
         printk(KERN_ALERT "interrupt VM!!! = %x\n", gpio_get_value(IMX_GPIO_NR(5, 14)));
 		stopwatch_write(_inode, "4444", DIGIT, NULL);
         return IRQ_HANDLED;
@@ -110,24 +110,28 @@ int stopwatch_open(struct inode *minode, struct file *mfile) {
 	stopwatch_port_usage = 1;
 
 	// int1
+	gpio_request(IMX_GPIO_NR(1,11), "GPIO_home");
 	gpio_direction_input(IMX_GPIO_NR(1,11));
 	irq = gpio_to_irq(IMX_GPIO_NR(1,11));
 	printk(KERN_ALERT "IRQ Number : %d\n",irq);
 	ret=request_irq(irq, inter_handler_HM, IRQF_TRIGGER_FALLING, "home", 0);
 
 	// int2
+	gpio_request(IMX_GPIO_NR(1,12), "GPIO_back");
 	gpio_direction_input(IMX_GPIO_NR(1,12));
 	irq = gpio_to_irq(IMX_GPIO_NR(1,12));
 	printk(KERN_ALERT "IRQ Number : %d\n",irq);
 	ret=request_irq(irq, inter_handler_BK, IRQF_TRIGGER_FALLING, "back", 0);
 
 	// int3
+	gpio_request(IMX_GPIO_NR(2,15), "GPIO_volup");
 	gpio_direction_input(IMX_GPIO_NR(2,15));
 	irq = gpio_to_irq(IMX_GPIO_NR(2,15));
 	printk(KERN_ALERT "IRQ Number : %d\n",irq);
 	ret=request_irq(irq, inter_handler_VP, IRQF_TRIGGER_FALLING, "volup", 0);
 
 	// int4
+	gpio_request(IMX_GPIO_NR(5,14), "GPIO_voldown");
 	gpio_direction_input(IMX_GPIO_NR(5,14));
 	irq = gpio_to_irq(IMX_GPIO_NR(5,14));
 	printk(KERN_ALERT "IRQ Number : %d\n",irq);
