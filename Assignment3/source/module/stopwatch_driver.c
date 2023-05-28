@@ -52,11 +52,13 @@ int _command;
 unsigned char _data_init[4];
 _Bool USER_WRITE = true;
 
-
 struct file *_inode;//temporary
 
-
+// initialize wait queue
+/*
 wait_queue_head_t wq_write;
+init_waitqueue_head(&wq_write);
+*/
 DECLARE_WAIT_QUEUE_HEAD(wq_write);
 
 // define functions...
@@ -79,7 +81,8 @@ irqreturn_t inter_handler_HM(int irq, void* dev_id) {
 	printk(KERN_ALERT "interrupt HM!!! = %x\n", gpio_get_value(IMX_GPIO_NR(1, 11)));
 	
 	if(_interrupt_count == 0) {	
-		del_timer_sync(&stw_timer.timer);
+		//del_timer_sync(&stw_timer.timer);
+		del_timer(&stw_timer.timer);
 
 		stw_timer.timer.expires = get_jiffies_64() + (0 * HZ);
 		stw_timer.timer.data = (unsigned long)&stw_timer;
@@ -96,10 +99,10 @@ irqreturn_t inter_handler_BK(int irq, void* dev_id) {
 
 	if(++_interrupt_count>=3) {
 		_interrupt_count=0;
-                __wake_up(&wq_write, 1, 1, NULL);
+        __wake_up(&wq_write, 1, 1, NULL);
 		//wake_up_interruptible(&wq_write);
 		printk("wake up\n");
-        }
+    }
 
 	return IRQ_HANDLED;
 }
@@ -221,36 +224,36 @@ static void kernel_timer_repeat(unsigned long tdata) {
 	char data[4];
 	int len = DIGIT;
 
-	stw_timer.t_sec++;
-	//printk("log: kernel_timer_repeat:: t_sec: %d\n", stw_timer.t_sec);
-	if(stw_timer.t_sec == 10) {
-		stw_timer.t_sec = 0;
+	t_ptr->t_sec++;
+	//printk("log: kernel_timer_repeat:: t_sec: %d\n", t_ptr->t_sec);
+	if(t_ptr->t_sec == 10) {
+		t_ptr->t_sec = 0;
 
-		stw_timer.sec++;
-		if(stw_timer.sec == 60) {
-			stw_timer.min++; 
-			stw_timer.sec = 0;
+		t_ptr->sec++;
+		if(t_ptr->sec == 60) {
+			t_ptr->min++; 
+			t_ptr->sec = 0;
 		}
-		if(stw_timer.min == 60) 
-			stw_timer.min = 0;
+		if(t_ptr->min == 60) 
+			t_ptr->min = 0;
 
-		//printk("log: kernel_timer_repeat %d\n", stw_timer.sec);
+		//printk("log: kernel_timer_repeat %d\n", t_ptr->sec);
 
-		sprintf(data, "%02d%02d", stw_timer.min, stw_timer.sec);
+		sprintf(data, "%02d%02d", t_ptr->min, t_ptr->sec);
 		
-		printk("log: kernel_timer_repeat:: m&s: %2d:%2d\n", stw_timer.min, stw_timer.sec);
+		printk("log: kernel_timer_repeat:: m&s: %02d:%02d\n", t_ptr->min, t_ptr->sec);
 		//printk("log: kernel_timer_repeat:: data: %c%c%c%c\n", data[0], data[1], data[2], data[3]);
-		stopwatch_write(stw_timer.inode, data, len, NULL);
-		printk("______________________________________________________________________\n");
+		stopwatch_write(t_ptr->inode, data, len, NULL);
+		//printk("______________________________________________________________________\n");
 	}
 	// turn off(reset) devices [_command] seconds after task finish.
-	if(_interrupt_count) {
-		printk("\nCounter expired. Shutting down in %d seconds...\n", _command);
-		stw_timer.timer.expires = get_jiffies_64() + (0 * HZ);
-		stw_timer.timer.data = (unsigned long)&stw_timer;
-		stw_timer.timer.function = kernel_timer_blank;
+	if(_interrupt_count==2) {
+		printk("\nStopwatch stopped - %02d:%02d.%02d\n", t_ptr->min, t_ptr->sec, t_ptr->t_sec);
+		t_ptr->timer.expires = get_jiffies_64() + (0 * HZ);
+		t_ptr->timer.data = (unsigned long)&t_ptr;
+		t_ptr->timer.function = kernel_timer_blank;
 
-		add_timer(&stw_timer.timer);
+		add_timer(&t_ptr->timer);
 		return;
 	}
 
@@ -265,9 +268,10 @@ static void kernel_timer_repeat(unsigned long tdata) {
 
 // reset(turn off) devices
 static void kernel_timer_blank(unsigned long tdata) {
+	struct stopwatch_timer *t_ptr = (struct stopwatch_timer*)tdata;
 	char blank[5] = {0x30, 0x30, 0x30, 0x30, '\0'};
 	printk("______________________________________________________________________\n");
-	stopwatch_write(stw_timer.inode, blank, 4, NULL);
+	stopwatch_write(t_ptr->inode, blank, 4, NULL);
 	return;
 }
 
