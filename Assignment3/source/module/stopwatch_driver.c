@@ -53,7 +53,8 @@ static struct exit_timer {
 //Global variable
 static int stopwatch_port_usage = 0;
 static unsigned char *stopwatch_addr;
-int _exit_check = 0;
+int _run_check = 0;
+int _pause_check = 0;
 int _command;
 unsigned char _data_init[4];
 _Bool USER_WRITE = true;
@@ -97,7 +98,8 @@ irqreturn_t inter_handler_HM(int irq, void* dev_id) {
 	//printk(KERN_ALERT "interrupt HM!!! = %x\n", gpio_get_value(IMX_GPIO_NR(1, 11)));
 	//printk(KERN_ALERT "interrupt STOPWATCH START!!!\n");
 	
-	if(_exit_check == 0) {	
+	if(_run_check == 0) {	
+		_run_check = 1;
 
 		INIT_WORK(&task, wq_func1);
 
@@ -115,6 +117,9 @@ irqreturn_t inter_handler_BK(int irq, void* dev_id) {
 	flush_workqueue(stw_wq);
 	ret = del_timer(&stw_timer.timer);
 
+	_run_check = 0;
+	_pause_check = 1;
+
 	if(ret) {
 		printk(KERN_ALERT "\n");
 		for(i=0; i<stw_timer.t_sec; ++i) 
@@ -129,6 +134,7 @@ irqreturn_t inter_handler_VP(int irq, void* dev_id) {
 	//printk(KERN_ALERT "interrupt STOPWATCH RESET!!!\n");
 
 	flush_workqueue(stw_wq);
+	_run_check = 0;
 	stopwatch_blank(&stw_timer);
 	stw_timer.min = stw_timer.sec = stw_timer.t_sec = 0;
 
@@ -301,10 +307,16 @@ static void kernel_timer_repeat(unsigned long tdata) {
 	struct stopwatch_timer *t_ptr = (struct stopwatch_timer*)tdata;
 	char data[4];
 	int len = DIGIT;
+	int i;
 
 	t_ptr->t_sec++;
 	//printk("log: kernel_timer_repeat:: t_sec: %d\n", t_ptr->t_sec);
 	//printk(KERN_CONT "\r\t\t\t%d", t_ptr->t_sec);
+	if(!_run_check) {
+		printk(KERN_ALERT "\n");
+		for(i=0; i<stw_timer.t_sec; ++i) 
+			printk(KERN_CONT "  ");
+	}
 	printk(KERN_CONT " %d", t_ptr->t_sec);
 	if(t_ptr->t_sec == 10) {
 		t_ptr->t_sec = 0;
@@ -333,8 +345,15 @@ static void kernel_timer_repeat(unsigned long tdata) {
 }
 static void kernel_timer_count(unsigned long tdata) {
 	struct exit_timer *t_ptr = (struct exit_timer*)tdata;
+	int i;
 	//printk("log: kernel_timer_count: t_ptr->count(ex_timer.count): %d", t_ptr->count);
-	printk("VOL- button pressed : about to shut down in %d second(s)\n", 3-t_ptr->count);
+	printk("\n\r\t\tVOL- button pressed : about to shut down in %d second(s)\n", 3-t_ptr->count);
+	if(_run_check || _pause_check) {
+		_pause_check = !_run_check;
+		printk(KERN_ALERT "\n");
+		for(i=0; i<stw_timer.t_sec; ++i) 
+			printk(KERN_CONT "  ");
+	}
 	t_ptr->timer.expires = get_jiffies_64() + (1 * HZ);
 	t_ptr->timer.data = (unsigned long)t_ptr;
 	t_ptr->timer.function = kernel_timer_count;
@@ -346,6 +365,9 @@ static void kernel_timer_count(unsigned long tdata) {
 	if(ex_timer.count >= 3) {
 		del_timer(&ex_timer.timer);
 		del_timer(&stw_timer.timer);
+		stopwatch_blank(&stw_timer);
+
+		_run_check = 0;
 
 		__wake_up(&app_waitqueue, 1, 1, NULL);
 		//wake_up_interruptible(&app_waitqueue);
@@ -363,7 +385,7 @@ static void stopwatch_blank(struct stopwatch_timer *tdata) {
 
 	del_timer(&t_ptr->timer);
 
-	printk("Stopwatch stopped - %02d:%02d.%02d\n", t_ptr->min, t_ptr->sec, t_ptr->t_sec);
+	printk("\nStopwatch stopped - %02d:%02d.%02d\n", t_ptr->min, t_ptr->sec, t_ptr->t_sec);
 	printk("______________________________________________________________________\n");
 	
 	stopwatch_write(t_ptr->inode, blank, 4, NULL);
