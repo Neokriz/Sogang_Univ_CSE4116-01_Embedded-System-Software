@@ -28,10 +28,10 @@ int main(void)
 	//int i;
 	//int str_size;
 
-
-	memset(data,0x39,sizeof(data));
+	// initial FND value
+	memset(data,0x30,sizeof(data));
 	//memset(command,0x30,sizeof(command));
-	strcpy(command, "2");
+	strcpy(command, "0");
 
     dev = open(STOPWATCH_DEVICE, O_RDWR);
     if (dev<0) {
@@ -40,10 +40,10 @@ int main(void)
     }
 	else
 		printf("< stopwatch device has been detected > \n");
+	usleep(10000);
 
 	ret_val = ioctl_set_option(dev, data);
     if(ret_val>-1) {
-		printf("---------------\n");
 		ret_val = ioctl_command(dev, command);
 	}
 	else
