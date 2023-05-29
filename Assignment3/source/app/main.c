@@ -25,8 +25,6 @@ int main(void)
 	char data[4];
 	unsigned char ret_val;
 	char command[2];
-	//int i;
-	//int str_size;
 
 	// initial FND value
 	memset(data,0x30,sizeof(data));
