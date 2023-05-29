@@ -48,7 +48,7 @@ static struct stopwatch_timer {
 //Global variable
 static int stopwatch_port_usage = 0;
 static unsigned char *stopwatch_addr;
-int _interrupt_count = 0;
+int _exit_check = 0;
 int _command;
 unsigned char _data_init[4];
 _Bool USER_WRITE = true;
@@ -85,58 +85,62 @@ irqreturn_t inter_handler_HM(int irq, void* dev_id) {
 	static struct work_struct task;
 	int ret;
 
-	printk(KERN_ALERT "interrupt HM!!! = %x\n", gpio_get_value(IMX_GPIO_NR(1, 11)));
+	//printk(KERN_ALERT "interrupt HM!!! = %x\n", gpio_get_value(IMX_GPIO_NR(1, 11)));
+	//printk(KERN_ALERT "interrupt STOPWATCH START!!!\n");
 	
-	if(_interrupt_count == 0) {	
-		//del_timer_sync(&stw_timer.timer); //unsafe in up
+	if(_exit_check == 0) {	
 
 		INIT_WORK(&task, wq_func1);
 
 		ret = queue_work(stw_wq, &task);
-/*
-		del_timer(&stw_timer.timer);
-
-		stw_timer.timer.expires = get_jiffies_64() + (0 * HZ);
-		stw_timer.timer.data = (unsigned long)&stw_timer;
-		stw_timer.timer.function = kernel_timer_repeat;
-
-		add_timer(&stw_timer.timer);
-*/
 	}
 			
 	return IRQ_HANDLED;
 }
 
 irqreturn_t inter_handler_BK(int irq, void* dev_id) {
-	printk(KERN_ALERT "interrupt BK!!! = %x\n", gpio_get_value(IMX_GPIO_NR(1, 12)));
+	int ret, i;
+	//printk(KERN_ALERT "interrupt BK!!! = %x\n", gpio_get_value(IMX_GPIO_NR(1, 12)));
+	//printk(KERN_ALERT "interrupt STOPWATCH PAUSE!!!\n");
 
-	if(++_interrupt_count>=1) {
-		stopwatch_blank(&stw_timer);
+	flush_workqueue(stw_wq);
+	ret = del_timer(&stw_timer.timer);
 
-		_interrupt_count=0;
-        __wake_up(&app_waitqueue, 1, 1, NULL);
-		//wake_up_interruptible(&app_waitqueue);
-		printk("wake up\n");
-    }
+	if(ret) {
+	printk(KERN_ALERT "\n");
+	for(i=0; i<stw_timer.t_sec; ++i) 
+		printk(KERN_CONT "  ");
+	}
 
 	return IRQ_HANDLED;
 }
 
 irqreturn_t inter_handler_VP(int irq, void* dev_id) {
+	//printk(KERN_ALERT "interrupt VP!!! = %x\n", gpio_get_value(IMX_GPIO_NR(2, 15)));
+	//printk(KERN_ALERT "interrupt STOPWATCH RESET!!!\n");
 
-	printk(KERN_ALERT "interrupt VP!!! = %x\n", gpio_get_value(IMX_GPIO_NR(2, 15)));
-
+	flush_workqueue(stw_wq);
 	stopwatch_blank(&stw_timer);
 	stw_timer.min = stw_timer.sec = stw_timer.t_sec = 0;
 
 	printk("Reset stopwatch\n");
-	printk("______________________________________________________________________\n");
 
 	return IRQ_HANDLED;
 }
 
 irqreturn_t inter_handler_VM(int irq, void* dev_id) {
-	printk(KERN_ALERT "interrupt VM!!! = %x\n", gpio_get_value(IMX_GPIO_NR(5, 14)));
+	//printk(KERN_ALERT "interrupt VM!!! = %x\n", gpio_get_value(IMX_GPIO_NR(5, 14)));
+	//printk(KERN_ALERT "\ninterrupt STOPWATCH EXIT!!!\n");
+	
+	if(++_exit_check>=1) {
+		stopwatch_blank(&stw_timer);
+
+		_exit_check=0;
+        __wake_up(&app_waitqueue, 1, 1, NULL);
+		//wake_up_interruptible(&app_waitqueue);
+		printk("wake up\n");
+    }
+
 	return IRQ_HANDLED;
 }
 
@@ -248,7 +252,8 @@ ssize_t stopwatch_read(struct file *inode, char *gdata, size_t length, loff_t *o
 }
 
 static void wq_func1(struct work_struct *work) {
-	del_timer(&stw_timer.timer);
+	//del_timer(&stw_timer.timer);
+	del_timer_sync(&stw_timer.timer);
 
 	stw_timer.timer.expires = get_jiffies_64() + (0 * HZ);
 	stw_timer.timer.data = (unsigned long)&stw_timer;
@@ -265,9 +270,11 @@ static void kernel_timer_repeat(unsigned long tdata) {
 
 	t_ptr->t_sec++;
 	//printk("log: kernel_timer_repeat:: t_sec: %d\n", t_ptr->t_sec);
+	//printk(KERN_CONT "\r\t\t\t%d", t_ptr->t_sec);
+	printk(KERN_CONT " %d", t_ptr->t_sec);
 	if(t_ptr->t_sec == 10) {
 		t_ptr->t_sec = 0;
-
+		printk("\n");
 		t_ptr->sec++;
 		if(t_ptr->sec == 60) {
 			t_ptr->min++; 
@@ -280,7 +287,7 @@ static void kernel_timer_repeat(unsigned long tdata) {
 
 		sprintf(data, "%02d%02d", t_ptr->min, t_ptr->sec);
 		
-		printk("log: kernel_timer_repeat:: time: %02d:%02d\n", t_ptr->min, t_ptr->sec);
+		printk("[time  %02d:%02d]\n", t_ptr->min, t_ptr->sec);
 		//printk("log: kernel_timer_repeat:: data: %c%c%c%c\n", data[0], data[1], data[2], data[3]);
 		stopwatch_write(t_ptr->inode, data, len, NULL);
 		//printk("______________________________________________________________________\n");
@@ -348,7 +355,7 @@ long stopwatch_ioctl(struct file *inode, unsigned int ioctl_num, unsigned long i
 			}
 			printk("log: iom_dev_ioctl: [2]_command: %d\n", _command);
 
-			if(_interrupt_count == 0) {
+			if(_exit_check == 0) {
 				printk("sleep on\n");
 				interruptible_sleep_on(&app_waitqueue);
 			}
