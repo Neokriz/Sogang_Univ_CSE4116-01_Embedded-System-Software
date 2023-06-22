@@ -60,19 +60,19 @@ public class MainActivity extends ActionBarActivity {
 	 */
 	public static class PlaceholderFragment extends Fragment {
 
-		int idx = 0;
-		
 		public PlaceholderFragment() {
 		}
 		
+		TextView[] gearPositon = new TextView[5];
 		TextView rpmInfo;
-		TextView[] gearInfo = new TextView[5];
+		TextView gearInfo;
 		
 		Handler rpmHandler;
 		Runnable rpmRunnable;
 		
 		Automobile myCar = new Automobile();
-	
+		int gearPos_idx = myCar.getPos().ordinal();
+		
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 			
@@ -80,14 +80,16 @@ public class MainActivity extends ActionBarActivity {
 			View rootView = inflater.inflate(R.layout.fragment_main, container,
 					false);
 			
-			//final TextView gearInfo = (TextView) rootView.findViewById(R.id.gearPTextView);
-			gearInfo[0] = (TextView) rootView.findViewById(R.id.gearPTextView);
-			gearInfo[1] = (TextView) rootView.findViewById(R.id.gearRTextView);
-			gearInfo[2] = (TextView) rootView.findViewById(R.id.gearNTextView);
-			gearInfo[3] = (TextView) rootView.findViewById(R.id.gearDTextView);
-			gearInfo[4] = (TextView) rootView.findViewById(R.id.gearMSTextView);
+			//final TextView gearPositon = (TextView) rootView.findViewById(R.id.gearPTextView);
+			gearPositon[0] = (TextView) rootView.findViewById(R.id.gearPTextView);
+			gearPositon[1] = (TextView) rootView.findViewById(R.id.gearRTextView);
+			gearPositon[2] = (TextView) rootView.findViewById(R.id.gearNTextView);
+			gearPositon[3] = (TextView) rootView.findViewById(R.id.gearDTextView);
+			gearPositon[4] = (TextView) rootView.findViewById(R.id.gearMSTextView);
 			
 			rpmInfo = (TextView) rootView.findViewById(R.id.rpmDptextView);
+			gearInfo = (TextView) rootView.findViewById(R.id.gearDptextView);
+			
 			
 			Button gearUpBtn = (Button) rootView.findViewById(R.id.gearUpBtn);
 			Button gearDownBtn = (Button) rootView.findViewById(R.id.gearDownBtn);
@@ -95,63 +97,76 @@ public class MainActivity extends ActionBarActivity {
 			Button ignBtn = (Button) rootView.findViewById(R.id.ignitionBtn);
 
 			
-			//gearInfo.setText(Gear.values()[idx].name());
-			gearInfo[0].setTextColor(textColor);
+			//gearPositon.setText(Gear.values()[gearPos_idx].name());
 			
 			gearUpBtn.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					
-					
-					if(idx < 3) {
-						idx = gearChange(v, idx, 1);
+					if(myCar.getEngineStat()) {
+						if(gearPos_idx <= Automobile.GearPos.N.ordinal()) {
+							gearPos_idx = Controller.gearChange(myCar, v, gearPos_idx, 1);
+							Log.d("gearUP", ""+myCar.getPos()+"(gearPos_idx:"+gearPos_idx+")");
+							for(int i=0; i<5; ++i){
+								gearPositon[i].setTextColor(Color.BLACK);
+							}
+							gearPositon[gearPos_idx].setTextColor(textColor);
+						}
 					}
-					Log.d("gearUP", ""+idx);
-					//printGear(v, gearInfo, idx);
-					for(int i=0; i<4; ++i){
-						gearInfo[i].setTextColor(Color.BLACK);
-					}
-					gearInfo[idx].setTextColor(textColor);
 				}
 			});
 			
 			gearDownBtn.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					if(idx > 0 && idx < 4) {
-						idx = gearChange(v, idx, -1);
+					if(myCar.getEngineStat()) {
+						if(gearPos_idx > Automobile.GearPos.P.ordinal() 
+							&& gearPos_idx <= Automobile.GearPos.D.ordinal()) {
+							gearPos_idx = Controller.gearChange(myCar, v, gearPos_idx, -1);
+							Log.d("gearDown", ""+myCar.getPos()+"(gearPos_idx:"+gearPos_idx+")");
+							for(int i=0; i<5; ++i){
+								gearPositon[i].setTextColor(Color.BLACK);
+							}
+							gearPositon[gearPos_idx].setTextColor(textColor);
+						}
 					}
-					Log.d("gearDown", ""+idx);
-					//printGear(v, gearInfo, idx);
-					for(int i=0; i<5; ++i){
-						gearInfo[i].setTextColor(Color.BLACK);
-					}
-					gearInfo[idx].setTextColor(textColor);
 				}
 			});
 
 			gearMSBtn.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					if(idx == 3) {
-						idx = gearChange(v, idx, +1);
+					if(myCar.getEngineStat()){
+						if(gearPos_idx == Automobile.GearPos.D.ordinal()) {
+							gearPos_idx = Controller.gearChange(myCar, v, gearPos_idx, +1);
+						}
+						else if(gearPos_idx == Automobile.GearPos.M.ordinal()){
+							gearPos_idx = Controller.gearChange(myCar, v, gearPos_idx, -1);
+						}
+						Log.d("gearManual", ""+gearPos_idx);
+						//printGear(v, gearPositon, gearPos_idx);
+						for(int i=0; i<5; ++i){
+							gearPositon[i].setTextColor(Color.BLACK);
+						}
+						gearPositon[gearPos_idx].setTextColor(textColor);
 					}
-					else if(idx == 4){
-						idx = gearChange(v, idx, -1);
-					}
-					Log.d("gearManual", ""+idx);
-					//printGear(v, gearInfo, idx);
-					for(int i=0; i<5; ++i){
-						gearInfo[i].setTextColor(Color.BLACK);
-					}
-					gearInfo[idx].setTextColor(textColor);
 				}
 			});
 			
 			ignBtn.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					myCar.setEngineStat(true);
+					if(myCar.getEngineStat() == false) {
+						myCar.setEngineStat(true);
+						Log.d("Gear positon:", ""+myCar.getPos());
+						gearPositon[myCar.getPos().ordinal()].setTextColor(textColor);
+					}
+					else {
+						myCar.setEngineStat(false);					
+						for(int i=0; i<5; ++i){
+							gearPositon[i].setTextColor(Color.BLACK);
+						}
+					}
+					
 				}
 			});
 			
@@ -159,10 +174,14 @@ public class MainActivity extends ActionBarActivity {
 			rpmRunnable = new Runnable() {
 				@Override
 				public void run(){
-					rpmInfo.setText(String.valueOf(myCar.getRpm()));
 					if(myCar.getEngineStat()) {
 						myCar.updateRpm(0);
 					}
+					else {
+						myCar.setRpm(0);
+					}
+					rpmInfo.setText(String.valueOf(myCar.getRpm()));
+					gearInfo.setText(String.valueOf(myCar.getGear()));
 					rpmHandler.postDelayed(this, 100);
 				}
 			};
@@ -184,12 +203,5 @@ public class MainActivity extends ActionBarActivity {
 	    }
 
 	}
-	
-	public static int gearChange(View v, int value, int dir){
-		return value+dir;
-	}
-	
-	public static void printGear(View v, TextView tview, int value){
-		tview.setText(Automobile.Gear.values()[value].name());
-	}
+
 }

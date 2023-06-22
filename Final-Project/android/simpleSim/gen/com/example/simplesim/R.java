@@ -1092,7 +1092,7 @@ containing a value of this type.
         public static final int action_menu_divider=0x7f050016;
         public static final int action_menu_presenter=0x7f050017;
         public static final int action_mode_close_button=0x7f050024;
-        public static final int action_settings=0x7f05004e;
+        public static final int action_settings=0x7f05004f;
         public static final int activity_chooser_view_content=0x7f050025;
         public static final int always=0x7f05000b;
         public static final int beginning=0x7f050011;
@@ -1109,6 +1109,7 @@ containing a value of this type.
         public static final int expanded_menu=0x7f05002c;
         public static final int gearDTextView=0x7f050046;
         public static final int gearDownBtn=0x7f05003e;
+        public static final int gearDptextView=0x7f05004e;
         public static final int gearMSBtn=0x7f050040;
         public static final int gearMSTextView=0x7f05004b;
         public static final int gearMinusTextView=0x7f05004a;
@@ -1265,16 +1266,17 @@ containing a value of this type.
         public static final int gear_shift=0x7f0a0012;
         public static final int gear_up=0x7f0a0011;
         public static final int hello_world=0x7f0a000e;
-        public static final int ignition=0x7f0a001b;
-        public static final int rpm_display=0x7f0a001c;
+        public static final int ignition=0x7f0a001c;
+        public static final int rpm_display=0x7f0a001d;
         public static final int str_D=0x7f0a0016;
         public static final int str_M=0x7f0a0017;
-        public static final int str_MS=0x7f0a001a;
+        public static final int str_MS=0x7f0a001b;
         public static final int str_N=0x7f0a0015;
         public static final int str_P=0x7f0a0013;
         public static final int str_R=0x7f0a0014;
-        public static final int str_minus=0x7f0a0019;
-        public static final int str_plus=0x7f0a0018;
+        public static final int str_minus=0x7f0a001a;
+        public static final int str_plus=0x7f0a0019;
+        public static final int str_zero=0x7f0a0018;
     }
     public static final class style {
         /** 

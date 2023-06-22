@@ -106,7 +106,7 @@
         android:layout_width="4dp"
         android:layout_height="60dp"
         android:layout_alignTop="@+id/gearDTextView"
-        android:layout_marginRight="40dp"
+        android:layout_marginEnd="40dp"
         android:layout_marginStart="14dp"
         android:layout_toStartOf="@+id/gearDTextView"
         android:background="#000000" />
@@ -161,8 +161,6 @@
         android:layout_height="wrap_content"
         android:layout_alignTop="@+id/lineDtoM1"
         android:layout_toEndOf="@+id/gearMSBtn"
-        android:shadowDx="2"
-        android:shadowDy="2"
         android:text="@string/rpm_display"
         android:textSize="40sp" />
 
@@ -174,5 +172,16 @@
         android:layout_below="@+id/gearNTextView"
         android:layout_toEndOf="@+id/gearMSBtn"
         android:text="@string/ignition" />
+
+    <TextView
+        android:id="@+id/gearDptextView"
+        android:layout_width="40dp"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/rpmDptextView"
+        android:layout_alignBottom="@+id/rpmDptextView"
+        android:layout_toEndOf="@+id/rpmDptextView"
+        android:layout_marginStart="30dp"
+        android:text="@string/str_zero"
+        android:textSize="40sp" />
 
 </RelativeLayout>

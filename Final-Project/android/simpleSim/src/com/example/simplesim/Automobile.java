@@ -2,13 +2,16 @@ package com.example.simplesim;
 
 import java.util.Random;
 
+import android.util.Log;
+
 public class Automobile {
 	private boolean engineStat;
     private int rpm;
-    private Gear gear;
+    private int gear;
+    private GearPos pos;
     private double speed;
     
-	public enum Gear {
+	public enum GearPos {
 		P("Parking"),
 		R("Reverse"),
 		N("Neutral"),
@@ -17,7 +20,7 @@ public class Automobile {
 		;
 		private final String label;
 		
-		Gear(String label){
+		GearPos(String label){
 			this.label = label;
 		}
 		
@@ -29,7 +32,8 @@ public class Automobile {
     public Automobile() {
     	this.engineStat = false;
         this.rpm = 0;
-        this.gear = Gear.P;
+        this.gear = 0;
+        this.pos = GearPos.P;
         this.speed = calculateSpeed();
     }
     
@@ -38,7 +42,8 @@ public class Automobile {
     }
     
     public void setEngineStat(boolean engineStat){
-    	this.engineStat = true;
+    	this.engineStat = engineStat;
+        Log.d("EngineStatus", ""+this.engineStat);
     }
 
     public int getRpm() {
@@ -49,14 +54,36 @@ public class Automobile {
         this.rpm = rpm;
         this.speed = calculateSpeed();
     }
-
-    public Gear getGear() {
+    
+    public int getGear() {
         return gear;
     }
 
-    public void setGear(Gear gear) {
+    public void setGear(int gear) {
         this.gear = gear;
         this.speed = calculateSpeed();
+    }
+
+    public GearPos getPos() {
+        return pos;
+    }
+
+    public void setPos(GearPos pos) {
+        this.pos = pos;
+        switch(pos) {
+        case P:
+        	setGear(0);
+        	break;
+        case R:
+        	setGear(-1);
+        	break;
+        case N:
+        	setGear(0);
+        	break;
+        case D:
+        	setGear(1);
+        	break;
+        }
     }
 
     public double getSpeed() {
@@ -65,13 +92,13 @@ public class Automobile {
 
     private double calculateSpeed() {
         // Speed calculation logic based on RPM and gear
-        double speed = rpm * gear.ordinal() * 0.01; // TODO: Adjust the calculation formula according to your requirements
+        double speed = rpm * pos.ordinal() * 0.01; // TODO: Adjust the calculation formula according to your requirements
         return speed;
     }
 	
     public void updateRpm(int rpm) {
         Random random = new Random();
-        rpm = random.nextInt(21) + 970 + rpm; // Generate a random number between 970 and 990
-        
+        this.rpm = random.nextInt(21) + 970 + rpm; // Generate a random number between 970 and 990
+        //Log.d("UmpdateRPM", ""+rpm);
     }
 }

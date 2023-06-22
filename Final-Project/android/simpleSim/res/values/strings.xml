@@ -12,6 +12,7 @@
     <string name="str_N">N</string>
     <string name="str_D">D</string>
     <string name="str_M">M</string>    
+    <string name="str_zero">0</string>
     <string name="str_plus">+</string>      
     <string name="str_minus">_</string>    
     <string name="str_MS">M/S</string>
