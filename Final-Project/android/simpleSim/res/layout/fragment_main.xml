@@ -1,0 +1,178 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.example.simplesim.MainActivity$PlaceholderFragment" >
+
+    <TextView
+        android:id="@+id/gearPTextView"
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="150dp"
+        android:layout_marginTop="10dp"
+        android:text="@string/str_P"
+        android:textSize="50sp" />
+
+    <Button
+        android:id="@+id/gearDownBtn"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/gearPTextView"
+        android:layout_marginStart="42dp"
+        android:layout_toEndOf="@+id/gearPTextView"
+        android:text="@string/gear_down" />
+
+    <Button
+        android:id="@+id/gearUpBtn"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/gearDownBtn"
+        android:layout_below="@+id/gearDownBtn"
+        android:layout_marginTop="20dp"
+        android:text="@string/gear_up" />
+    
+    <Button
+        android:id="@+id/gearMSBtn"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/gearDownBtn"
+        android:layout_below="@+id/gearUpBtn"
+        android:layout_marginTop="20dp"
+        android:text="@string/gear_shift" />
+    
+
+    <View
+        android:id="@+id/linePtoR"
+        android:layout_width="4dp"
+        android:layout_height="30dp"
+        android:layout_alignStart="@+id/gearPTextView"
+        android:layout_below="@+id/gearPTextView"
+        android:layout_marginStart="14dp"
+        android:background="#000000" />
+
+    <TextView
+        android:id="@+id/gearRTextView"
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/gearPTextView"
+        android:layout_below="@+id/linePtoR"
+        android:text="@string/str_R"
+        android:textSize="50sp" />
+    
+     <View
+        android:id="@+id/lineRtoN"
+        android:layout_width="4dp"
+        android:layout_height="30dp"
+        android:layout_alignStart="@+id/gearPTextView"
+        android:layout_below="@+id/gearRTextView"
+        android:layout_marginStart="14dp"
+        android:background="#000000" />
+
+    <TextView
+        android:id="@+id/gearNTextView"
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/gearRTextView"
+        android:layout_below="@+id/lineRtoN"
+        android:text="@string/str_N"
+        android:textSize="50sp" />
+    
+     <View
+        android:id="@+id/lineNtoD"
+        android:layout_width="4dp"
+        android:layout_height="30dp"
+        android:layout_alignStart="@+id/gearPTextView"
+        android:layout_below="@+id/gearNTextView"
+        android:layout_marginStart="14dp"
+        android:background="#000000" />
+     
+    <TextView
+        android:id="@+id/gearDTextView"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/gearRTextView"
+        android:layout_below="@+id/lineNtoD"
+        android:text="@string/str_D"
+        android:textSize="50sp" />
+
+    <View
+        android:id="@+id/lineDtoM0"
+        android:layout_width="4dp"
+        android:layout_height="60dp"
+        android:layout_alignTop="@+id/gearDTextView"
+        android:layout_marginRight="40dp"
+        android:layout_marginStart="14dp"
+        android:layout_toStartOf="@+id/gearDTextView"
+        android:background="#000000" />
+
+    <View
+        android:id="@+id/lineDtoM1"
+        android:layout_width="30dp"
+        android:layout_height="4dp"
+        android:layout_alignTop="@+id/lineDtoM0"
+        android:layout_marginEnd="14dp"
+        android:layout_marginStart="14dp"
+        android:layout_marginTop="28dp"
+        android:layout_toStartOf="@+id/gearDTextView"
+        android:background="#000000" />
+
+    <TextView
+        android:id="@+id/gearPlusTextView"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/gearNTextView"
+        android:layout_marginStart="94dp"
+        android:layout_marginTop="84dp"
+        android:text="@string/str_plus"
+        android:textSize="50sp" />
+    
+    <TextView
+        android:id="@+id/gearMinusTextView"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/gearRTextView"
+        android:layout_marginStart="96dp"
+        android:layout_marginTop="54dp"
+        android:text="@string/str_minus"
+        android:textSize="50sp" />
+
+    <TextView
+        android:id="@+id/gearMSTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignTop="@+id/lineDtoM0"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="6dp"
+        android:text="@string/str_MS"
+        android:textSize="40sp" />
+
+    <TextView
+        android:id="@+id/rpmDptextView"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/lineDtoM1"
+        android:layout_toEndOf="@+id/gearMSBtn"
+        android:shadowDx="2"
+        android:shadowDy="2"
+        android:text="@string/rpm_display"
+        android:textSize="40sp" />
+
+    <Button
+        android:id="@+id/ignitionBtn"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/gearNTextView"
+        android:layout_toEndOf="@+id/gearMSBtn"
+        android:text="@string/ignition" />
+
+</RelativeLayout>

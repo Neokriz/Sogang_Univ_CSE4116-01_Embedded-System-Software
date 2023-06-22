@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">simpleSim</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="gear_down">Down</string>
+    <string name="gear_up">Up</string>
+   	<string name="gear_shift">Manual Shift</string>
+    <string name="str_P">P</string>
+    <string name="str_R">R</string>
+    <string name="str_N">N</string>
+    <string name="str_D">D</string>
+    <string name="str_M">M</string>    
+    <string name="str_plus">+</string>      
+    <string name="str_minus">_</string>    
+    <string name="str_MS">M/S</string>
+    <string name="ignition">IGN</string> 
+    <string name="rpm_display">RPM+</string>          
+
+</resources>
