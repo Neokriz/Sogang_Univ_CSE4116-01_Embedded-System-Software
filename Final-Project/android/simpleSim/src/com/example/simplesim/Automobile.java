@@ -28,6 +28,29 @@ public class Automobile {
 			return label;
 		}
 	}
+	
+	public enum GearRatio {
+	    R(3.297),
+	    FINAL(2.563),
+	    ONE(4.696),
+	    TWO(3.130),
+	    THREE(2.104),
+	    FOUR(1.667),
+	    FIVE(1.285),
+	    SIX(1.000),
+	    SEVEN(0.839),
+	    EIGHT(0.667);
+	    
+	    private double value;
+	    
+	    GearRatio(double value) {
+	        this.value = value;
+	    }
+	    
+	    public double getValue() {
+	        return value;
+	    }
+	}
 
     public Automobile() {
     	this.engineStat = false;
@@ -51,7 +74,15 @@ public class Automobile {
     }
 
     public void setRpm(int rpm) {
-        this.rpm = rpm;
+    	if(rpm > 7300) {
+    		Random random = new Random();
+            this.rpm = random.nextInt(200) + 7300;
+    	}
+    	else if(rpm < 0) {
+    		this.rpm = 0;
+    	}
+    	else
+    		this.rpm = rpm;
         this.speed = calculateSpeed();
     }
     
@@ -88,6 +119,8 @@ public class Automobile {
         		setGear(this.gear);
         	}
         	break;
+		default:
+			break;
         }
     }
 
@@ -97,8 +130,12 @@ public class Automobile {
 
     private double calculateSpeed() {
         // Speed calculation logic based on RPM and gear
-        double speed = this.rpm * this.gear * 0.01; // TODO: Adjust the calculation formula according to your requirements
-        return speed;
+        //double speed = this.rpm * this.gear * 0.01; // TODO: Adjust the calculation formula according to your requirements
+    	double gearRatio = GearRatio.values()[this.gear+1].getValue();
+    	double finalDrive = GearRatio.FINAL.getValue();
+    	Log.d("GearRatio", ""+GearRatio.values()[this.gear+1].getValue());
+    	this.speed = 3.78 * 225 * 55 * 4800 * 16 * this.rpm / (gearRatio * finalDrive * 1000000);
+        return this.speed;
     }
 	
     public void updateRpm(int rpm) {

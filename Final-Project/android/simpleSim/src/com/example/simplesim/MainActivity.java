@@ -1,15 +1,15 @@
 package com.example.simplesim;
-import java.util.Random;
 
 import com.example.simplesim.Controller;
 import com.example.simplesim.Automobile;
+import com.example.simplesim.VerticalSeekBar;
 //import android.R;
 import com.example.simplesim.R;
 
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.Fragment;
+import android.support.v4.app.Fragment; 
 import android.support.v4.content.ContextCompat;
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -20,9 +20,13 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.MotionEvent;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 public class MainActivity extends ActionBarActivity {
 
@@ -66,12 +70,15 @@ public class MainActivity extends ActionBarActivity {
 		TextView[] gearPositon = new TextView[5];
 		TextView rpmInfo;
 		TextView gearInfo;
+		TextView speedInfo;
 		
 		Handler rpmHandler;
 		Runnable rpmRunnable;
 		
 		Automobile myCar = new Automobile();
+		Controller myController = new Controller();
 		int gearPos_idx = myCar.getPos().ordinal();
+		int guage = 0;
 		
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -89,12 +96,17 @@ public class MainActivity extends ActionBarActivity {
 			
 			rpmInfo = (TextView) rootView.findViewById(R.id.rpmDptextView);
 			gearInfo = (TextView) rootView.findViewById(R.id.gearDptextView);
-			
+			speedInfo = (TextView) rootView.findViewById(R.id.speedDpTextView);
+
 			
 			Button gearUpBtn = (Button) rootView.findViewById(R.id.gearUpBtn);
 			Button gearDownBtn = (Button) rootView.findViewById(R.id.gearDownBtn);
 			Button gearMSBtn = (Button) rootView.findViewById(R.id.gearMSBtn);
-			Button ignBtn = (Button) rootView.findViewById(R.id.ignitionBtn);
+			ToggleButton ignBtn = (ToggleButton) rootView.findViewById(R.id.ignitionBtn);
+			Button throttleBtn = (Button) rootView.findViewById(R.id.throttleBtn);
+			Button brakeBtn = (Button) rootView.findViewById(R.id.brakeBtn);
+			VerticalSeekBar throttleBar = (VerticalSeekBar) rootView.findViewById(R.id.throttleBar);;
+
 
 			//gearPositon.setText(Gear.values()[gearPos_idx].name());
 			
@@ -157,17 +169,19 @@ public class MainActivity extends ActionBarActivity {
 					}
 				}
 			});
-			
-			ignBtn.setOnClickListener(new View.OnClickListener() {
+			// Ignition button 
+			ignBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 				@Override
-				public void onClick(View v) {
-					if(myCar.getEngineStat() == false) {
+				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+					if(isChecked) {
+						myController.setIgnitionprocess(1);
 						Controller.ignite(myCar, true);
 						Log.d("Gear positon:", ""+myCar.getPos());
 						gearPositon[myCar.getPos().ordinal()].setTextColor(textColor);
 					}
 					else {
-						Controller.ignite(myCar, false);				
+						myController.setIgnitionprocess(-1);
+						Controller.ignite(myCar, false);			
 						for(int i=0; i<5; ++i){
 							gearPositon[i].setTextColor(Color.BLACK);
 						}
@@ -175,20 +189,108 @@ public class MainActivity extends ActionBarActivity {
 					
 				}
 			});
+			// Throttle button 
+			throttleBtn.setOnTouchListener(new View.OnTouchListener() {
+				@Override
+				public boolean onTouch(View v, MotionEvent event) {
+			        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+						if(myCar.getEngineStat()){
+							myController.setAcceleratation(1);
+							guage = 100;
+						}
+			            return true;
+			        } else if (event.getAction() == MotionEvent.ACTION_UP) {
+						if(myCar.getEngineStat()){
+							myController.setAcceleratation(-1);
+							guage = 100;
+						}
+			            return true;
+			        }
+			        return false;
+				}
+			});
+			// Brake button 
+			brakeBtn.setOnTouchListener(new View.OnTouchListener() {
+				@Override
+				public boolean onTouch(View v, MotionEvent event) {
+					if(myCar.getEngineStat()){
+						
+					}
+			        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+
+			            return true;
+			        } else if (event.getAction() == MotionEvent.ACTION_UP) {
+
+			            return true;
+			        }
+			        return false;
+				}
+			});
+			// Throttle bar
+			throttleBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+				int P_val = 0;
+	            @Override
+	            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+	                // Handle seek bar progress change
+	            	P_val = progress;
+	            	if(progress < 20) {
+	            		myController.setAcceleratation(-1);
+	            		guage = 100 - (P_val) * 5;
+	            	}
+	            	else {
+	            		guage = progress-15;
+						if(myCar.getEngineStat()){
+							myController.setAcceleratation(1);
+						}
+	            	}
+	            }
+
+	            @Override
+	            public void onStartTrackingTouch(SeekBar seekBar) {
+	                // Handle seek bar touch start
+	            }
+
+	            @Override
+	            public void onStopTrackingTouch(SeekBar seekBar) {
+	                // Handle seek bar touch end
+	            	if(guage < 20) {
+						myController.setAcceleratation(-1);
+	            		guage = 100 - (P_val) * 5;
+	            	}
+	            }
+	        });
+			
+			//////////////////////////////////////////////////////////////////////////////////////
 			
 			rpmHandler = new Handler();
 			rpmRunnable = new Runnable() {
 				@Override
 				public void run(){
-					if(myCar.getEngineStat()) {
-						myCar.updateRpm(0);
+					if(myController.getIgnitionprocess() == 1) {
+						Controller.engineStart(myCar);
+						rpmHandler.postDelayed(this, 1);
+					}
+					else if(myController.getIgnitionprocess() == -1) {
+						Controller.engineShutdown(myCar);
+						rpmHandler.postDelayed(this, 1);
+					}
+					else if(myController.getAcceleratation() == 1) {
+						Controller.accelerate(myCar, 1, guage);
+						rpmHandler.postDelayed(this, 1);
+					}
+					else if(myController.getAcceleratation() == -1) {
+						Controller.accelerate(myCar, -1, guage);
+						rpmHandler.postDelayed(this, 1);
 					}
 					else {
-						myCar.setRpm(0);
+						Controller.idle(myCar);
+						rpmHandler.postDelayed(this, 100);
 					}
 					rpmInfo.setText(String.valueOf(myCar.getRpm()));
 					gearInfo.setText(String.valueOf(myCar.getGear()));
-					rpmHandler.postDelayed(this, 100);
+					if(myCar.getPos() != Automobile.GearPos.P && myCar.getPos() != Automobile.GearPos.N) {
+						speedInfo.setText(String.valueOf(myCar.getSpeed()));
+					}
 				}
 			};
 			

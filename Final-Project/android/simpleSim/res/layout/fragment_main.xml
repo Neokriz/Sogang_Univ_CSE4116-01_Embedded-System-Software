@@ -39,7 +39,7 @@
     
     <Button
         android:id="@+id/gearMSBtn"
-        android:layout_width="80dp"
+        android:layout_width="90dp"
         android:layout_height="wrap_content"
         android:layout_alignStart="@+id/gearDownBtn"
         android:layout_below="@+id/gearUpBtn"
@@ -155,24 +155,25 @@
         android:text="@string/str_MS"
         android:textSize="40sp" />
 
-    <TextView
-        android:id="@+id/rpmDptextView"
-        android:layout_width="120dp"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/lineDtoM1"
-        android:layout_toEndOf="@+id/gearMSBtn"
-        android:text="@string/rpm_display"
-        android:textSize="40sp" />
-
-    <Button
+    <ToggleButton
         android:id="@+id/ignitionBtn"
-        style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/gearNTextView"
         android:layout_toEndOf="@+id/gearMSBtn"
         android:text="@string/ignition" />
 
+    <TextView
+        android:id="@+id/rpmDptextView"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/gearMSBtn"
+        android:layout_alignTop="@+id/lineDtoM1"
+        android:layout_marginStart="20dp"
+        android:gravity="end"
+        android:text="@string/rpm_display"
+        android:textSize="40sp" />
+        
     <TextView
         android:id="@+id/gearDptextView"
         android:layout_width="40dp"
@@ -181,7 +182,60 @@
         android:layout_alignBottom="@+id/rpmDptextView"
         android:layout_toEndOf="@+id/rpmDptextView"
         android:layout_marginStart="30dp"
+        android:gravity="center"
         android:text="@string/str_zero"
         android:textSize="40sp" />
+
+    <Button
+        android:id="@+id/throttleBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="140dp"
+        android:layout_alignBottom="@+id/gearDTextView"
+        android:layout_alignStart="@+id/brakeBtn"
+        android:layout_marginStart="100dp"
+        android:gravity="center_vertical|fill_horizontal"
+        android:text="@string/throttle" />
+
+    <Button
+        android:id="@+id/brakeBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/gearMinusTextView"
+        android:layout_marginEnd="195dp"
+        android:layout_marginStart="178dp"
+        android:layout_toEndOf="@+id/gearDptextView"
+        android:text="@string/brake" />
+
+    <com.example.simplesim.VerticalSeekBar
+        android:id="@+id/throttleBar"
+        android:layout_width="100dp"
+        android:layout_height="250dp"
+        android:layout_alignTop="@+id/lineRtoN"
+        android:layout_toEndOf="@+id/throttleBtn"
+        android:max="100" />
+
+    <TextView
+        android:id="@+id/speedDpTextView"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/gearDptextView"
+        android:layout_alignBottom="@+id/gearDptextView"
+        android:layout_marginStart="0dp"
+        android:layout_toEndOf="@+id/gearDptextView"
+        android:gravity="end"
+        android:text="@string/str_zero"
+        android:textSize="10sp" />
+
+    <TextView
+        android:id="@+id/kmhTextView"
+        android:layout_width="60dp"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/speedDpTextView"
+        android:layout_alignBottom="@+id/speedDpTextView"
+        android:layout_toEndOf="@+id/speedDpTextView"
+        android:gravity="center"
+        android:text="@string/str_kmh"
+        android:textSize="20sp" />
 
 </RelativeLayout>

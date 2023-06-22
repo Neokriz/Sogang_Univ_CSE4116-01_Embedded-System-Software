@@ -16,7 +16,10 @@
     <string name="str_plus">+</string>      
     <string name="str_minus">_</string>    
     <string name="str_MS">M/S</string>
+    <string name="str_kmh">Km/h</string>
     <string name="ignition">IGN</string> 
-    <string name="rpm_display">RPM+</string>          
+    <string name="rpm_display">RPM+</string> 
+    <string name="throttle">Throttle</string>           
+    <string name="brake">Brake</string>                    
 
 </resources>
