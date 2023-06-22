@@ -81,7 +81,12 @@ public class Automobile {
         	setGear(0);
         	break;
         case D:
-        	setGear(1);
+        	if(this.gear == 0) {
+        		setGear(1);
+        	}
+        	else {
+        		setGear(this.gear);
+        	}
         	break;
         }
     }
@@ -92,7 +97,7 @@ public class Automobile {
 
     private double calculateSpeed() {
         // Speed calculation logic based on RPM and gear
-        double speed = rpm * pos.ordinal() * 0.01; // TODO: Adjust the calculation formula according to your requirements
+        double speed = this.rpm * this.gear * 0.01; // TODO: Adjust the calculation formula according to your requirements
         return speed;
     }
 	

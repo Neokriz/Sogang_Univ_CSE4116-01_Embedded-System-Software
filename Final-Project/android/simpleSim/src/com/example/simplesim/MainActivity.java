@@ -96,51 +96,57 @@ public class MainActivity extends ActionBarActivity {
 			Button gearMSBtn = (Button) rootView.findViewById(R.id.gearMSBtn);
 			Button ignBtn = (Button) rootView.findViewById(R.id.ignitionBtn);
 
-			
 			//gearPositon.setText(Gear.values()[gearPos_idx].name());
 			
+			// Gear Up button 
 			gearUpBtn.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
 					if(myCar.getEngineStat()) {
 						if(gearPos_idx <= Automobile.GearPos.N.ordinal()) {
-							gearPos_idx = Controller.gearChange(myCar, v, gearPos_idx, 1);
+							gearPos_idx = Controller.gearChange(myCar, gearPos_idx, 1);
 							Log.d("gearUP", ""+myCar.getPos()+"(gearPos_idx:"+gearPos_idx+")");
 							for(int i=0; i<5; ++i){
 								gearPositon[i].setTextColor(Color.BLACK);
 							}
 							gearPositon[gearPos_idx].setTextColor(textColor);
 						}
+						else if(gearPos_idx == Automobile.GearPos.M.ordinal()) {
+							Controller.shiftUp(myCar);
+						}
 					}
 				}
 			});
-			
+			// Gear Down button 
 			gearDownBtn.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
 					if(myCar.getEngineStat()) {
 						if(gearPos_idx > Automobile.GearPos.P.ordinal() 
 							&& gearPos_idx <= Automobile.GearPos.D.ordinal()) {
-							gearPos_idx = Controller.gearChange(myCar, v, gearPos_idx, -1);
+							gearPos_idx = Controller.gearChange(myCar, gearPos_idx, -1);
 							Log.d("gearDown", ""+myCar.getPos()+"(gearPos_idx:"+gearPos_idx+")");
 							for(int i=0; i<5; ++i){
 								gearPositon[i].setTextColor(Color.BLACK);
 							}
 							gearPositon[gearPos_idx].setTextColor(textColor);
 						}
+						else if(gearPos_idx == Automobile.GearPos.M.ordinal()) {
+							Controller.shiftDown(myCar);
+						}
 					}
 				}
 			});
-
+			// Gear Manual Shift button 
 			gearMSBtn.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
 					if(myCar.getEngineStat()){
 						if(gearPos_idx == Automobile.GearPos.D.ordinal()) {
-							gearPos_idx = Controller.gearChange(myCar, v, gearPos_idx, +1);
+							gearPos_idx = Controller.gearChange(myCar, gearPos_idx, +1);
 						}
 						else if(gearPos_idx == Automobile.GearPos.M.ordinal()){
-							gearPos_idx = Controller.gearChange(myCar, v, gearPos_idx, -1);
+							gearPos_idx = Controller.gearChange(myCar, gearPos_idx, -1);
 						}
 						Log.d("gearManual", ""+gearPos_idx);
 						//printGear(v, gearPositon, gearPos_idx);
@@ -156,12 +162,12 @@ public class MainActivity extends ActionBarActivity {
 				@Override
 				public void onClick(View v) {
 					if(myCar.getEngineStat() == false) {
-						myCar.setEngineStat(true);
+						Controller.ignite(myCar, true);
 						Log.d("Gear positon:", ""+myCar.getPos());
 						gearPositon[myCar.getPos().ordinal()].setTextColor(textColor);
 					}
 					else {
-						myCar.setEngineStat(false);					
+						Controller.ignite(myCar, false);				
 						for(int i=0; i<5; ++i){
 							gearPositon[i].setTextColor(Color.BLACK);
 						}
