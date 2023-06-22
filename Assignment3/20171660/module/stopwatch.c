@@ -297,8 +297,6 @@ static void wq_func2(struct work_struct *work) {
 
 	add_timer(&ex_timer.timer);
 
-
-
 	return;
 }
 
@@ -332,6 +330,7 @@ static void kernel_timer_repeat(unsigned long tdata) {
 		sprintf(data, "%02d%02d", t_ptr->min, t_ptr->sec);
 		
 		printk("\t\t\t[time  %02d:%02d]\n", t_ptr->min, t_ptr->sec);
+		USER_WRITE = false;
 		stopwatch_write(t_ptr->inode, data, len, NULL);
 	}
 
@@ -377,7 +376,6 @@ static void kernel_timer_count(unsigned long tdata) {
 	return;
 }
 
-
 // reset(turn off) devices
 static void stopwatch_blank(struct stopwatch_timer *tdata) {
 	struct stopwatch_timer *t_ptr = (struct stopwatch_timer*)tdata;
@@ -388,6 +386,7 @@ static void stopwatch_blank(struct stopwatch_timer *tdata) {
 	printk("\nStopwatch stopped - %02d:%02d.%02d\n", t_ptr->min, t_ptr->sec, t_ptr->t_sec);
 	printk("______________________________________________________________________\n");
 	
+	USER_WRITE = false;
 	stopwatch_write(t_ptr->inode, blank, 4, NULL);
 
 	return;
