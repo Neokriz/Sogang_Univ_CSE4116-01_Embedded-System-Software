@@ -97,26 +97,75 @@ public class Controller {
 		return car.getGear();
 	}
 	
-	public static int accelerate(Automobile car, int input, float gauge) { //input is +1 or -1
+	public static int accelerate(Automobile car, int input, int throttle) { //input is +1 or -1
+		//Log.d("accelerate called", ""+throttle);
+		int gwsPosition = car.getPos().ordinal();
 		double increment;
 		double ratio =  Automobile.GearRatio.values()[car.getGear()+1].getValue();
-		increment = 4 * input * (gauge / 100) * ratio;
+		if(input > 0) {
+			increment = 3 * input * (throttle / 100) * ratio;
+		}
+		else {
+			increment = 5 * input * (throttle / 100);
+		}
 		
-		if(car.getRpm() < 780) {
+		if(car.getRpm() < 500) { //TODO:FIX need
 			acceleratation = 0;
 		}
 		
-		if(car.getPos().ordinal() > Automobile.GearPos.P.ordinal()) {
+		if(gwsPosition > Automobile.GearPos.P.ordinal()) {
 			//increase RPM
 			car.setRpm(car.getRpm()+(int)increment);
+			if(gwsPosition == Automobile.GearPos.D.ordinal()) {
+				boolean accel = (input > 0) ? true : false;
+				driveMode(car, throttle, accel);
+			}
 		}
 			
 		return 1;
 	}
 	
-	public static void driveMode(Automobile car, int throttle) {
-		//Throttle 100%
-		
+	public static void driveMode(Automobile car, int throttle, boolean accel) {
+		Log.d("driveMode, throttle:", ""+throttle);
+		int row = throttle / 10;
+		int column = 0;  //gear value is between 1 to 8;
+		double weightVal = (throttle % 10) * 0.1;
+		int carGear = car.getGear();
+		int carRpm = car.getRpm();
+		int shiftRpm = 9999;
+		int plusRpm = 0;
 
+		//accel == true, up shift
+		if(accel == true && carGear < 8) {
+			column = carGear - 1;
+			shiftRpm = ShiftPatternTable.getUpValue(row, column);
+			
+			Log.d("row", ""+row);
+			Log.d("column", ""+column);
+			Log.d("weightVal", ""+weightVal);
+			Log.d("carGear", ""+carGear);
+			Log.d("shiftRpm", ""+shiftRpm);
+						
+			if(weightVal != 0) {
+				//plusRpm = (int)(weightVal * (ShiftPatternTable.getUpValue(row + 1, column) - shiftRpm));
+			}
+			if(carRpm >= (shiftRpm + plusRpm)) {
+				car.setGear(carGear + 1);
+				car.updateRpm(car.getSpeed());
+			}
+		}
+		//accel == false, down shift
+		else if(carGear > 1){
+			column = car.getGear() - 2;
+			shiftRpm = ShiftPatternTable.getDownValue(row, column);
+
+			if(weightVal != 0) {
+				//plusRpm = (int)(weightVal * (ShiftPatternTable.getDownValue(row + 1, column) - shiftRpm));
+			}
+			if(carRpm <= (shiftRpm + plusRpm)) {
+				car.setGear(carGear - 1);
+				car.updateRpm(car.getSpeed());
+			}
+		}
 	}
 }

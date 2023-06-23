@@ -10,10 +10,10 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment; 
-import android.support.v4.content.ContextCompat;
-import android.annotation.SuppressLint;
-import android.content.Context;
-import android.content.res.Resources;
+//import android.support.v4.content.ContextCompat;
+//import android.annotation.SuppressLint;
+//import android.content.Context;
+//import android.content.res.Resources;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -234,11 +234,12 @@ public class MainActivity extends ActionBarActivity {
 	                // Handle seek bar progress change
 	            	P_val = progress;
 	            	if(progress < 20) {
-	            		myController.setAcceleratation(-1);
-	            		guage = 100 - (P_val) * 5;
+	            		myController.setAcceleratation(0);
+	            		//guage = 100 - (P_val) * 5;
+	            		guage = P_val;
 	            	}
 	            	else {
-	            		guage = progress-15;
+	            		guage = P_val;
 						if(myCar.getEngineStat()){
 							myController.setAcceleratation(1);
 						}
@@ -255,7 +256,8 @@ public class MainActivity extends ActionBarActivity {
 	                // Handle seek bar touch end
 	            	if(guage < 20) {
 						myController.setAcceleratation(-1);
-	            		guage = 100 - (P_val) * 5;
+	            		//guage = 100 - (P_val) * 5;
+						guage = P_val;
 	            	}
 	            }
 	        });

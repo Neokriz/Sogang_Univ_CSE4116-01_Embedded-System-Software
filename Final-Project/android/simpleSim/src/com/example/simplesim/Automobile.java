@@ -11,6 +11,8 @@ public class Automobile {
     private GearPos pos;
     private double speed;
     
+    private static final int MILLION = 1000000;
+    
 	public enum GearPos {
 		P("Parking"),
 		R("Reverse"),
@@ -75,9 +77,9 @@ public class Automobile {
     }
 
     public void setRpm(int rpm) {
-    	if(rpm > 7200) {
+    	if(rpm > 6200) {
     		Random random = new Random();
-            this.rpm = random.nextInt(200) + 7200;
+            this.rpm = random.nextInt(200) + 6000;
     	}
     	else if(rpm < 0) {
     		this.rpm = 0;
@@ -93,7 +95,7 @@ public class Automobile {
 
     public void setGear(int gear) {
         this.gear = gear;
-        this.speed = calculateSpeed();
+        //this.speed = calculateSpeed();
     }
 
     public GearPos getPos() {
@@ -136,9 +138,19 @@ public class Automobile {
     	double finalDrive = GearRatio.FINAL.getValue();
     	//Log.d("GearRatio", ""+GearRatio.values()[this.gear+1].getValue());
     	//Log.d("FinalDrive", ""+finalDrive);
-    	this.speed = ((3.78 * 225 * 55) + (4800 * 16)) * this.rpm / (gearRatio * finalDrive * 1000000);
+    	this.speed = ((3.78 * 225 * 55) + (4800 * 16)) * this.rpm / (gearRatio * finalDrive * MILLION);
     	//Log.d("speed", ""+this.speed);
         return this.speed;
+    }
+    
+    private int calculateRpm(double speed) {
+    	double newRpm = 0;
+    	double gearRatio = GearRatio.values()[this.gear+1].getValue();
+    	double finalDrive = GearRatio.FINAL.getValue();
+    	
+    	newRpm = speed / (3.78 * 225 * 55 + 4800 * 16) * (gearRatio * finalDrive * MILLION);
+    	Log.d("newRPM : Speed", ""+newRpm+"__"+this.rpm+"__"+this.speed);
+    	return (int)newRpm;
     }
 	
     public void updateRpm(int rpm) {
@@ -146,4 +158,9 @@ public class Automobile {
         this.rpm = random.nextInt(21) + 770 + rpm; // Generate a random number between 970 and 990
         //Log.d("UmpdateRPM", ""+rpm);
     }
+    
+    public void updateRpm(double speed) {
+    	this.rpm = calculateRpm(speed);
+    }
+
 }
