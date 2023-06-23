@@ -238,4 +238,20 @@
         android:text="@string/str_kmh"
         android:textSize="20sp" />
 
+    <TextView
+        android:id="@+id/debugTextView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/gearDownBtn"
+        android:layout_alignParentLeft="true"
+        android:text="debug1" />
+
+    <TextView
+        android:id="@+id/debugTextView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/debugTextView1"
+        android:layout_below="@+id/debugTextView1"
+        android:text="debug2" />
+
 </RelativeLayout>

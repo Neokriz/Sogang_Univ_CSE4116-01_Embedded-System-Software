@@ -71,6 +71,7 @@ public class MainActivity extends ActionBarActivity {
 		TextView rpmInfo;
 		TextView gearInfo;
 		TextView speedInfo;
+		TextView debug;	TextView debug2;
 		
 		Handler rpmHandler;
 		Runnable rpmRunnable;
@@ -97,6 +98,7 @@ public class MainActivity extends ActionBarActivity {
 			rpmInfo = (TextView) rootView.findViewById(R.id.rpmDptextView);
 			gearInfo = (TextView) rootView.findViewById(R.id.gearDptextView);
 			speedInfo = (TextView) rootView.findViewById(R.id.speedDpTextView);
+			debug = (TextView) rootView.findViewById(R.id.debugTextView1);debug2 = (TextView) rootView.findViewById(R.id.debugTextView2);
 
 			
 			Button gearUpBtn = (Button) rootView.findViewById(R.id.gearUpBtn);
@@ -202,7 +204,7 @@ public class MainActivity extends ActionBarActivity {
 			        } else if (event.getAction() == MotionEvent.ACTION_UP) {
 						if(myCar.getEngineStat()){
 							myController.setAcceleratation(-1);
-							guage = 100;
+							guage = 0;
 						}
 			            return true;
 			        }
@@ -233,17 +235,24 @@ public class MainActivity extends ActionBarActivity {
 	            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 	                // Handle seek bar progress change
 	            	P_val = progress;
-	            	if(progress < 20) {
-	            		myController.setAcceleratation(0);
-	            		//guage = 100 - (P_val) * 5;
-	            		guage = P_val;
+	            	guage = P_val;
+	            	if(guage > 5){
+	            		myController.setAcceleratation(1);
 	            	}
 	            	else {
-	            		guage = P_val;
-						if(myCar.getEngineStat()){
-							myController.setAcceleratation(1);
-						}
+	            		myController.setAcceleratation(-1);
 	            	}
+//	            	if(progress < 20) {
+//	            		myController.setAcceleratation(0);
+//	            		//guage = 100 - (P_val) * 5;
+//	            		guage = P_val;
+//	            	}
+//	            	else {
+//	            		guage = P_val;
+//						if(myCar.getEngineStat()){
+//							myController.setAcceleratation(1);
+//						}
+//	            	}
 	            }
 
 	            @Override
@@ -254,11 +263,11 @@ public class MainActivity extends ActionBarActivity {
 	            @Override
 	            public void onStopTrackingTouch(SeekBar seekBar) {
 	                // Handle seek bar touch end
-	            	if(guage < 20) {
-						myController.setAcceleratation(-1);
-	            		//guage = 100 - (P_val) * 5;
-						guage = P_val;
-	            	}
+//	            	if(guage < 20) {
+//						myController.setAcceleratation(-1);
+//	            		//guage = 100 - (P_val) * 5;
+//						guage = P_val;
+//	            	}
 	            }
 	        });
 			
@@ -291,8 +300,11 @@ public class MainActivity extends ActionBarActivity {
 					rpmInfo.setText(String.valueOf(myCar.getRpm()));
 					gearInfo.setText(String.valueOf(myCar.getGear()));
 					if(myCar.getPos() != Automobile.GearPos.P && myCar.getPos() != Automobile.GearPos.N) {
-						speedInfo.setText(String.valueOf((int)Math.round(myCar.getSpeed())));
+						speedInfo.setText(String.valueOf((int)Math.round(myCar.getSpeed())));					
 					}
+					debug.setText(String.valueOf(myController.getAcceleratation()));
+					debug2.setText(String.valueOf(guage));
+
 				}
 			};
 			

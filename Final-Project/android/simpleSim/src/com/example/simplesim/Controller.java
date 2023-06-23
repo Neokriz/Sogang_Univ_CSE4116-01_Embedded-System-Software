@@ -103,13 +103,15 @@ public class Controller {
 		double increment;
 		double ratio =  Automobile.GearRatio.values()[car.getGear()+1].getValue();
 		if(input > 0) {
-			increment = 3 * input * (throttle / 100) * ratio;
+			increment = 3 * input * ((double)throttle / 100) * ratio;
+			increment = (increment > 1) ? increment : 0;
+			Log.d("increment", ""+increment);
 		}
 		else {
-			increment = 5 * input * (throttle / 100);
+			increment = 5 * input;
 		}
 		
-		if(car.getRpm() < 500) { //TODO:FIX need
+		if(car.getRpm() < 770) { //TODO:FIX need
 			acceleratation = 0;
 		}
 		
@@ -126,7 +128,7 @@ public class Controller {
 	}
 	
 	public static void driveMode(Automobile car, int throttle, boolean accel) {
-		Log.d("driveMode, throttle:", ""+throttle);
+		//Log.d("driveMode, throttle:", ""+throttle);
 		int row = throttle / 10;
 		int column = 0;  //gear value is between 1 to 8;
 		double weightVal = (throttle % 10) * 0.1;
@@ -140,14 +142,14 @@ public class Controller {
 			column = carGear - 1;
 			shiftRpm = ShiftPatternTable.getUpValue(row, column);
 			
-			Log.d("row", ""+row);
-			Log.d("column", ""+column);
-			Log.d("weightVal", ""+weightVal);
-			Log.d("carGear", ""+carGear);
-			Log.d("shiftRpm", ""+shiftRpm);
+			//Log.d("row", ""+row);
+			//Log.d("column", ""+column);
+			//Log.d("weightVal", ""+weightVal);
+			//Log.d("carGear", ""+carGear);
+			//Log.d("shiftRpm", ""+shiftRpm);
 						
 			if(weightVal != 0) {
-				//plusRpm = (int)(weightVal * (ShiftPatternTable.getUpValue(row + 1, column) - shiftRpm));
+				plusRpm = (int)(weightVal * (ShiftPatternTable.getUpValue(row + 1, column) - shiftRpm));
 			}
 			if(carRpm >= (shiftRpm + plusRpm)) {
 				car.setGear(carGear + 1);
@@ -156,6 +158,7 @@ public class Controller {
 		}
 		//accel == false, down shift
 		else if(carGear > 1){
+			row = 10;
 			column = car.getGear() - 2;
 			shiftRpm = ShiftPatternTable.getDownValue(row, column);
 
