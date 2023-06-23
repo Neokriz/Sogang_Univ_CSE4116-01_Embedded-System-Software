@@ -3,6 +3,7 @@ package com.example.simplesim;
 import android.util.Log;
 
 import com.example.simplesim.Automobile.GearPos;
+import com.example.simplesim.ShiftPatternTable;
 
 public class Controller {
 	public native int gearUp(int curr);
@@ -96,19 +97,26 @@ public class Controller {
 		return car.getGear();
 	}
 	
-	public static int accelerate(Automobile car, int input, float gauge) {
-		float increment;
-		increment = 43 * input * (gauge / 100);
-		if(car.getRpm() < 980) {
+	public static int accelerate(Automobile car, int input, float gauge) { //input is +1 or -1
+		double increment;
+		double ratio =  Automobile.GearRatio.values()[car.getGear()+1].getValue();
+		increment = 4 * input * (gauge / 100) * ratio;
+		
+		if(car.getRpm() < 780) {
 			acceleratation = 0;
 		}
 		
-		if(car.getPos().ordinal() > 0) {
+		if(car.getPos().ordinal() > Automobile.GearPos.P.ordinal()) {
+			//increase RPM
 			car.setRpm(car.getRpm()+(int)increment);
 		}
-
 			
 		return 1;
 	}
 	
+	public static void driveMode(Automobile car, int throttle) {
+		//Throttle 100%
+		
+
+	}
 }

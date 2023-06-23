@@ -31,7 +31,7 @@ public class Automobile {
 	
 	public enum GearRatio {
 	    R(3.297),
-	    FINAL(2.563),
+	    N(0.0),
 	    ONE(4.696),
 	    TWO(3.130),
 	    THREE(2.104),
@@ -39,7 +39,8 @@ public class Automobile {
 	    FIVE(1.285),
 	    SIX(1.000),
 	    SEVEN(0.839),
-	    EIGHT(0.667);
+	    EIGHT(0.667),
+	    FINAL(2.563);
 	    
 	    private double value;
 	    
@@ -74,9 +75,9 @@ public class Automobile {
     }
 
     public void setRpm(int rpm) {
-    	if(rpm > 7300) {
+    	if(rpm > 7200) {
     		Random random = new Random();
-            this.rpm = random.nextInt(200) + 7300;
+            this.rpm = random.nextInt(200) + 7200;
     	}
     	else if(rpm < 0) {
     		this.rpm = 0;
@@ -133,14 +134,16 @@ public class Automobile {
         //double speed = this.rpm * this.gear * 0.01; // TODO: Adjust the calculation formula according to your requirements
     	double gearRatio = GearRatio.values()[this.gear+1].getValue();
     	double finalDrive = GearRatio.FINAL.getValue();
-    	Log.d("GearRatio", ""+GearRatio.values()[this.gear+1].getValue());
-    	this.speed = 3.78 * 225 * 55 * 4800 * 16 * this.rpm / (gearRatio * finalDrive * 1000000);
+    	//Log.d("GearRatio", ""+GearRatio.values()[this.gear+1].getValue());
+    	//Log.d("FinalDrive", ""+finalDrive);
+    	this.speed = ((3.78 * 225 * 55) + (4800 * 16)) * this.rpm / (gearRatio * finalDrive * 1000000);
+    	//Log.d("speed", ""+this.speed);
         return this.speed;
     }
 	
     public void updateRpm(int rpm) {
         Random random = new Random();
-        this.rpm = random.nextInt(21) + 970 + rpm; // Generate a random number between 970 and 990
+        this.rpm = random.nextInt(21) + 770 + rpm; // Generate a random number between 970 and 990
         //Log.d("UmpdateRPM", ""+rpm);
     }
 }

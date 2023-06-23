@@ -289,7 +289,7 @@ public class MainActivity extends ActionBarActivity {
 					rpmInfo.setText(String.valueOf(myCar.getRpm()));
 					gearInfo.setText(String.valueOf(myCar.getGear()));
 					if(myCar.getPos() != Automobile.GearPos.P && myCar.getPos() != Automobile.GearPos.N) {
-						speedInfo.setText(String.valueOf(myCar.getSpeed()));
+						speedInfo.setText(String.valueOf((int)Math.round(myCar.getSpeed())));
 					}
 				}
 			};

@@ -225,7 +225,7 @@
         android:layout_toEndOf="@+id/gearDptextView"
         android:gravity="end"
         android:text="@string/str_zero"
-        android:textSize="10sp" />
+        android:textSize="40dp" />
 
     <TextView
         android:id="@+id/kmhTextView"
