@@ -38,6 +38,9 @@ public class MainActivity extends ActionBarActivity {
 			getSupportFragmentManager().beginTransaction()
 					.add(R.id.container, new PlaceholderFragment()).commit();
 		}
+		
+		System.loadLibrary("simple-sim");
+
 	}
 
 	@Override
@@ -217,6 +220,15 @@ public class MainActivity extends ActionBarActivity {
 				public boolean onTouch(View v, MotionEvent event) {
 					if(myCar.getEngineStat()){
 						
+						DeviceController devCtrl = new DeviceController();
+						int ret;
+						int fd = devCtrl.openSim();
+					    if (fd == -1) {
+					    	System.out.print("file open error");
+					    }
+					    String testData = String.valueOf(myCar.getRpm());
+						ret = devCtrl.writeToDevice(fd, testData);
+
 					}
 			        if (event.getAction() == MotionEvent.ACTION_DOWN) {
 
@@ -304,7 +316,7 @@ public class MainActivity extends ActionBarActivity {
 					}
 					debug.setText(String.valueOf(myController.getAcceleratation()));
 					debug2.setText(String.valueOf(guage));
-
+	
 				}
 			};
 			
