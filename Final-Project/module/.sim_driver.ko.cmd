@@ -1,0 +1,1 @@
+cmd_/home/embe/20171660/Project/source/module/sim_driver.ko := arm-none-linux-gnueabi-ld -EL -r  -T /work/achroimx_kernel/scripts/module-common.lds --build-id  -o /home/embe/20171660/Project/source/module/sim_driver.ko /home/embe/20171660/Project/source/module/sim_driver.o /home/embe/20171660/Project/source/module/sim_driver.mod.o
