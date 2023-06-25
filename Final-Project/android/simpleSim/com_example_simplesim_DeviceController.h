@@ -17,6 +17,22 @@ JNIEXPORT jint JNICALL Java_com_example_simplesim_DeviceController_openSim
 
 /*
  * Class:     com_example_simplesim_DeviceController
+ * Method:    closeSim
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_com_example_simplesim_DeviceController_closeSim
+  (JNIEnv *, jobject, jint);
+
+/*
+ * Class:     com_example_simplesim_DeviceController
+ * Method:    writeToDevice
+ * Signature: (ILjava/lang/String;)I
+ */
+JNIEXPORT jint JNICALL Java_com_example_simplesim_DeviceController_writeToDevice
+  (JNIEnv *, jobject, jint, jstring);
+
+/*
+ * Class:     com_example_simplesim_DeviceController
  * Method:    ioctlSetSim
  * Signature: (I[Ljava/lang/String;)I
  */
@@ -25,10 +41,10 @@ JNIEXPORT jint JNICALL Java_com_example_simplesim_DeviceController_ioctlSetSim
 
 /*
  * Class:     com_example_simplesim_DeviceController
- * Method:    writeToDevice
+ * Method:    ioctlCmdSim
  * Signature: (ILjava/lang/String;)I
  */
-JNIEXPORT jint JNICALL Java_com_example_simplesim_DeviceController_writeToDevice
+JNIEXPORT jint JNICALL Java_com_example_simplesim_DeviceController_ioctlCmdSim
   (JNIEnv *, jobject, jint, jstring);
 
 #ifdef __cplusplus

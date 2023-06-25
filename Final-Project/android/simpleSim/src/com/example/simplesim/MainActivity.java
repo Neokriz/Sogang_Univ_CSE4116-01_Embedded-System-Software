@@ -29,7 +29,10 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 public class MainActivity extends ActionBarActivity {
-
+	public static DeviceController devCtrl = new DeviceController();
+	public static int fd;
+	public static String[] testData = new String[3];
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -41,6 +44,13 @@ public class MainActivity extends ActionBarActivity {
 		
 		System.loadLibrary("simple-sim");
 
+        // Close the device
+		fd = devCtrl.openSim();
+	    if (fd == -1) {
+	    	System.out.print("file open error");
+	    }
+		devCtrl.ioctlCmdSim(fd, String.valueOf(0));
+		
 	}
 
 	@Override
@@ -83,6 +93,7 @@ public class MainActivity extends ActionBarActivity {
 		Controller myController = new Controller();
 		int gearPos_idx = myCar.getPos().ordinal();
 		int guage = 0;
+		boolean brakeOn = false;
 		
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -110,7 +121,7 @@ public class MainActivity extends ActionBarActivity {
 			ToggleButton ignBtn = (ToggleButton) rootView.findViewById(R.id.ignitionBtn);
 			Button throttleBtn = (Button) rootView.findViewById(R.id.throttleBtn);
 			Button brakeBtn = (Button) rootView.findViewById(R.id.brakeBtn);
-			VerticalSeekBar throttleBar = (VerticalSeekBar) rootView.findViewById(R.id.throttleBar);;
+			final VerticalSeekBar throttleBar = (VerticalSeekBar) rootView.findViewById(R.id.throttleBar);;
 
 
 			//gearPositon.setText(Gear.values()[gearPos_idx].name());
@@ -119,14 +130,27 @@ public class MainActivity extends ActionBarActivity {
 			gearUpBtn.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
+					gearPos_idx = myCar.getPos().ordinal();
 					if(myCar.getEngineStat()) {
 						if(gearPos_idx <= Automobile.GearPos.N.ordinal()) {
-							gearPos_idx = Controller.gearChange(myCar, gearPos_idx, 1);
-							Log.d("gearUP", ""+myCar.getPos()+"(gearPos_idx:"+gearPos_idx+")");
-							for(int i=0; i<5; ++i){
-								gearPositon[i].setTextColor(Color.BLACK);
+							if(gearPos_idx > Automobile.GearPos.P.ordinal()) {
+								gearPos_idx = Controller.gearChange(myCar, gearPos_idx, 1);
+								Log.d("gearUP", ""+myCar.getPos()+"(gearPos_idx:"+gearPos_idx+")");
+								for(int i=0; i<5; ++i){
+									gearPositon[i].setTextColor(Color.BLACK);
+								}
+								gearPositon[gearPos_idx].setTextColor(textColor);
 							}
-							gearPositon[gearPos_idx].setTextColor(textColor);
+							else {
+								if(brakeOn) {
+									gearPos_idx = Controller.gearChange(myCar, gearPos_idx, 1);
+									Log.d("gearUP", ""+myCar.getPos()+"(gearPos_idx:"+gearPos_idx+")");
+									for(int i=0; i<5; ++i){
+										gearPositon[i].setTextColor(Color.BLACK);
+									}
+									gearPositon[gearPos_idx].setTextColor(textColor);
+								}
+							}
 						}
 						else if(gearPos_idx == Automobile.GearPos.M.ordinal()) {
 							Controller.shiftUp(myCar);
@@ -138,8 +162,9 @@ public class MainActivity extends ActionBarActivity {
 			gearDownBtn.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
+					gearPos_idx = myCar.getPos().ordinal();
 					if(myCar.getEngineStat()) {
-						if(gearPos_idx > Automobile.GearPos.P.ordinal() 
+						if(gearPos_idx > Automobile.GearPos.R.ordinal() 
 							&& gearPos_idx <= Automobile.GearPos.D.ordinal()) {
 							gearPos_idx = Controller.gearChange(myCar, gearPos_idx, -1);
 							Log.d("gearDown", ""+myCar.getPos()+"(gearPos_idx:"+gearPos_idx+")");
@@ -150,6 +175,16 @@ public class MainActivity extends ActionBarActivity {
 						}
 						else if(gearPos_idx == Automobile.GearPos.M.ordinal()) {
 							Controller.shiftDown(myCar);
+						}
+						else {
+							if(brakeOn) {
+								gearPos_idx = Controller.gearChange(myCar, gearPos_idx, -1);
+								Log.d("gearDown", ""+myCar.getPos()+"(gearPos_idx:"+gearPos_idx+")");
+								for(int i=0; i<5; ++i){
+									gearPositon[i].setTextColor(Color.BLACK);
+								}
+								gearPositon[gearPos_idx].setTextColor(textColor);
+							}
 						}
 					}
 				}
@@ -206,7 +241,7 @@ public class MainActivity extends ActionBarActivity {
 			            return true;
 			        } else if (event.getAction() == MotionEvent.ACTION_UP) {
 						if(myCar.getEngineStat()){
-							myController.setAcceleratation(-1);
+							myController.setAcceleratation(0);
 							guage = 0;
 						}
 			            return true;
@@ -218,23 +253,13 @@ public class MainActivity extends ActionBarActivity {
 			brakeBtn.setOnTouchListener(new View.OnTouchListener() {
 				@Override
 				public boolean onTouch(View v, MotionEvent event) {
-					if(myCar.getEngineStat()){
-						
-						DeviceController devCtrl = new DeviceController();
-						int ret;
-						int fd = devCtrl.openSim();
-					    if (fd == -1) {
-					    	System.out.print("file open error");
-					    }
-					    String testData = String.valueOf(myCar.getRpm());
-						ret = devCtrl.writeToDevice(fd, testData);
-
-					}
 			        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-
+			        	myController.setDeceleration(1);
+			        	brakeOn = true;
 			            return true;
 			        } else if (event.getAction() == MotionEvent.ACTION_UP) {
-
+			        	myController.setDeceleration(0);
+			        	brakeOn = false;
 			            return true;
 			        }
 			        return false;
@@ -252,19 +277,20 @@ public class MainActivity extends ActionBarActivity {
 	            		myController.setAcceleratation(1);
 	            	}
 	            	else {
-	            		myController.setAcceleratation(-1);
+	            		myController.setAcceleratation(0);
 	            	}
-//	            	if(progress < 20) {
-//	            		myController.setAcceleratation(0);
-//	            		//guage = 100 - (P_val) * 5;
-//	            		guage = P_val;
-//	            	}
-//	            	else {
-//	            		guage = P_val;
-//						if(myCar.getEngineStat()){
-//							myController.setAcceleratation(1);
-//						}
-//	            	}
+	            		            	
+	            	if(progress < 20) {
+	            		myController.setAcceleratation(0);
+	            		//guage = 100 - (P_val) * 5;
+	            		guage = P_val;
+	            	}
+	            	else {
+	            		guage = P_val;
+						if(myCar.getEngineStat()){
+							myController.setAcceleratation(1);
+						}
+	            	}
 	            }
 
 	            @Override
@@ -280,6 +306,7 @@ public class MainActivity extends ActionBarActivity {
 //	            		//guage = 100 - (P_val) * 5;
 //						guage = P_val;
 //	            	}
+	            	seekBar.setProgress(0);
 	            }
 	        });
 			
@@ -301,21 +328,34 @@ public class MainActivity extends ActionBarActivity {
 						Controller.accelerate(myCar, 1, guage);
 						rpmHandler.postDelayed(this, 1);
 					}
-					else if(myController.getAcceleratation() == -1) {
+					else if(myController.getAcceleratation() == 0) {
+						if(myCar.getRpm() < 770){
+							Controller.idle(myCar);
+						}
 						Controller.accelerate(myCar, -1, guage);
 						rpmHandler.postDelayed(this, 1);
 					}
 					else {
 						Controller.idle(myCar);
-						rpmHandler.postDelayed(this, 100);
 					}
 					rpmInfo.setText(String.valueOf(myCar.getRpm()));
 					gearInfo.setText(String.valueOf(myCar.getGear()));
-					if(myCar.getPos() != Automobile.GearPos.P && myCar.getPos() != Automobile.GearPos.N) {
+					//if(myCar.getPos() != Automobile.GearPos.P && myCar.getPos() != Automobile.GearPos.N) {
 						speedInfo.setText(String.valueOf((int)Math.round(myCar.getSpeed())));					
-					}
+					//}
 					debug.setText(String.valueOf(myController.getAcceleratation()));
 					debug2.setText(String.valueOf(guage));
+					
+					//throttleBar.setProgress((int)myCar.getSpeed());
+					//Log.d("testData speed", ""+myCar.getSpeed());
+				    
+				    testData[0] = String.valueOf(myCar.getRpm());
+				    testData[1] =  String.valueOf((int)(myCar.getSpeed()));
+				    testData[2] = (myCar.getPos() == Automobile.GearPos.M ? 
+				    		String.valueOf(myCar.getGear()) : 
+				    		String.valueOf(myCar.getPos()));
+				    //Log.d("testData", ""+testData[0]+"__"+testData[1]+"__"+testData[2]);
+					devCtrl.ioctlSetSim(fd, testData);
 	
 				}
 			};
@@ -334,6 +374,14 @@ public class MainActivity extends ActionBarActivity {
 		public void onPause() {
 	        super.onPause();
 	        rpmHandler.removeCallbacks(rpmRunnable); // Stop the update loop
+	    }
+	    
+	    @Override
+		public void onDestroy() {
+	        super.onDestroy();
+
+	        // Close the device
+	        devCtrl.closeSim(fd);
 	    }
 
 	}

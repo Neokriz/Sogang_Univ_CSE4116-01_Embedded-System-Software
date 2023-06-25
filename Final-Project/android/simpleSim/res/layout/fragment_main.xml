@@ -254,4 +254,21 @@
         android:layout_below="@+id/debugTextView1"
         android:text="debug2" />
 
+    <ImageView
+        android:id="@+id/rpm_background"
+        android:layout_width="250"
+        android:layout_height="250"
+        android:layout_alignBottom="@+id/ignitionBtn"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/rpm" />
+
+    <ImageView
+        android:id="@+id/speed_background"
+        android:layout_width="250"
+        android:layout_height="250"
+        android:layout_alignBottom="@+id/gearNTextView"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/speedDpTextView"
+        android:src="@drawable/speed" />
+
 </RelativeLayout>

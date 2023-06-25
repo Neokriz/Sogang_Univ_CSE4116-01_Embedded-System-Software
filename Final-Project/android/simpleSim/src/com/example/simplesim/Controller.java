@@ -11,7 +11,8 @@ public class Controller {
 	
 	private static int ignitionProcess; // 0 is defualt(Engine OFF), 1 is ignition process, -1 is shutdown process.
 	private static int acceleratation;	// 0 is default(throttle off), 1 is pressing throttle, -1 is throttle off.
-	
+	private static int deceleratation;	// 0 is default(barke off), 1 is brake
+
     public Controller() {
     	Controller.ignitionProcess = 0;
     	Controller.acceleratation = 0;
@@ -31,6 +32,14 @@ public class Controller {
 	
 	public void setAcceleratation(int value) {
 		Controller.acceleratation = value;
+	}
+	
+	public int getDeceleratation() {
+		return deceleratation;
+	}
+	
+	public void setDeceleration(int value) {
+		Controller.deceleratation = value;
 	}
 	
 	public static int ignite(Automobile car, boolean mode) {
@@ -54,7 +63,7 @@ public class Controller {
 	
 	public static int engineShutdown(Automobile car) {
 		car.setRpm(car.getRpm()-23);
-		if(car.getRpm() <= 40) {
+		if(car.getRpm() <= 30) {
 			ignitionProcess = 0;
 			car.setRpm(0);
 		}
@@ -74,6 +83,7 @@ public class Controller {
 	public static int gearChange(Automobile car, int value, int dir){
 		int pos = value + dir;
 		car.setPos(Automobile.GearPos.values()[pos]);
+		
 		return pos;
 	}
 	
@@ -84,6 +94,7 @@ public class Controller {
 		if(currGear > 0 && currGear <= 7) {
 			car.setGear(currGear+1);
 		}
+		car.updateRpm(car.getSpeed());
 		return car.getGear();
 	}
 	
@@ -94,6 +105,7 @@ public class Controller {
 		if(currGear > 1 && currGear <= 8) {
 			car.setGear(currGear-1);
 		}
+		car.updateRpm(car.getSpeed());
 		return car.getGear();
 	}
 	
@@ -105,24 +117,24 @@ public class Controller {
 		if(input > 0) {
 			increment = 3 * input * ((double)throttle / 100) * ratio;
 			increment = (increment > 1) ? increment : 0;
-			Log.d("increment", ""+increment);
+			//Log.d("increment", ""+increment);
 		}
 		else {
 			increment = 5 * input;
 		}
 		
-		if(car.getRpm() < 770) { //TODO:FIX need
-			acceleratation = 0;
-		}
+//		if(car.getRpm() < 770) { //TODO:FIX need
+//			acceleratation = 0;
+//		}
 		
-		if(gwsPosition > Automobile.GearPos.P.ordinal()) {
-			//increase RPM
-			car.setRpm(car.getRpm()+(int)increment);
-			if(gwsPosition == Automobile.GearPos.D.ordinal()) {
-				boolean accel = (input > 0) ? true : false;
-				driveMode(car, throttle, accel);
-			}
+		//if(gwsPosition > Automobile.GearPos.P.ordinal()) {
+		//increase RPM
+		car.setRpm(car.getRpm()+(int)increment);
+		if(gwsPosition == Automobile.GearPos.D.ordinal()) {
+			boolean accel = (input > 0) ? true : false;
+			driveMode(car, throttle, accel);
 		}
+		//}
 			
 		return 1;
 	}
@@ -163,12 +175,17 @@ public class Controller {
 			shiftRpm = ShiftPatternTable.getDownValue(row, column);
 
 			if(weightVal != 0) {
-				//plusRpm = (int)(weightVal * (ShiftPatternTable.getDownValue(row + 1, column) - shiftRpm));
+				plusRpm = (int)(weightVal * (ShiftPatternTable.getDownValue(row + 1, column) - shiftRpm));
 			}
 			if(carRpm <= (shiftRpm + plusRpm)) {
 				car.setGear(carGear - 1);
 				car.updateRpm(car.getSpeed());
 			}
 		}
+	}
+	
+	public static void manualMode(Automobile car, int throttle, boolean accel) {
+		
+		
 	}
 }

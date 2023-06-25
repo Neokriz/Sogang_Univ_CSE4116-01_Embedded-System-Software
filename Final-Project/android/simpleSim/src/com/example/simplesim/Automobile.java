@@ -33,7 +33,7 @@ public class Automobile {
 	
 	public enum GearRatio {
 	    R(3.297),
-	    N(0.0),
+	    N(1.0),
 	    ONE(4.696),
 	    TWO(3.130),
 	    THREE(2.104),
@@ -60,7 +60,8 @@ public class Automobile {
         this.rpm = 0;
         this.gear = 0;
         this.pos = GearPos.P;
-        this.speed = calculateSpeed();
+        this.speed = 0;
+        //this.speed = calculateSpeed();
     }
     
     public boolean getEngineStat(){
@@ -86,7 +87,9 @@ public class Automobile {
     	}
     	else
     		this.rpm = rpm;
-        this.speed = calculateSpeed();
+        if(this.gear != 0) {
+        	this.speed = calculateSpeed();
+        }
     }
     
     public int getGear() {
@@ -138,7 +141,12 @@ public class Automobile {
     	double finalDrive = GearRatio.FINAL.getValue();
     	//Log.d("GearRatio", ""+GearRatio.values()[this.gear+1].getValue());
     	//Log.d("FinalDrive", ""+finalDrive);
-    	this.speed = ((3.78 * 225 * 55) + (4800 * 16)) * this.rpm / (gearRatio * finalDrive * MILLION);
+    	if(gearRatio == 0) {
+    		this.speed = 0;
+    	}
+    	else {
+    		this.speed = ((3.78 * 225 * 55) + (4800 * 16)) * this.rpm / (gearRatio * finalDrive * MILLION);
+    	}
     	//Log.d("speed", ""+this.speed);
         return this.speed;
     }

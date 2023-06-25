@@ -3,6 +3,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <string.h>
+
 #include <sim_driver.h>
 #include <android/log.h>
 
@@ -14,31 +15,10 @@ JNIEXPORT jint JNICALL Java_com_example_simplesim_DeviceController_openSim(JNIEn
     return fd;
 }
 
-JNIEXPORT jint JNICALL Java_com_example_simplesim_DeviceController_ioctlSetSim(JNIEnv *env, jobject obj, jint fd, jobjectArray data) {
-    jsize length = (*env)->GetArrayLength(env, data);
+JNIEXPORT jint JNICALL Java_com_example_simplesim_DeviceController_closeSim(JNIEnv *env, jobject obj, jint fd) {
+	int ret = close(fd);
 
-    // Concatenate the strings from the Java array into a single message string
-    char message[10] = "";
-    jsize i;
-    for (i = 0; i < length; i++) {
-        jstring str = (jstring) (*env)->GetObjectArrayElement(env, data, i);
-        const char *strChars = (*env)->GetStringUTFChars(env, str, NULL);
-        if (i > 0) {
-            strcat(message, " ");  // Add the separator
-        }
-        strcat(message, strChars);
-        (*env)->ReleaseStringUTFChars(env, str, strChars);
-    }
-
-    __android_log_print(ANDROID_LOG_DEBUG, "FPGA_device.c", "%s", message);
-
-    // Perform the ioctl operation with the message string
-    int result = ioctl(fd, SET_DATA, message);
-    if (result == -1) {
-        perror("Failed to perform ioctl");
-    }
-
-    return result;
+    return ret;
 }
 
 JNIEXPORT jint JNICALL Java_com_example_simplesim_DeviceController_writeToDevice(JNIEnv *env, jobject obj, jint fd, jstring data) {
@@ -58,4 +38,46 @@ JNIEXPORT jint JNICALL Java_com_example_simplesim_DeviceController_writeToDevice
     }
 
     return bytesWritten;
+}
+
+JNIEXPORT jint JNICALL Java_com_example_simplesim_DeviceController_ioctlSetSim(JNIEnv *env, jobject obj, jint fd, jobjectArray data) {
+    jsize length = (*env)->GetArrayLength(env, data);
+
+    // Concatenate the strings from the Java array into a single message string
+    char message[10] = "";
+    jsize i;
+    for (i = 0; i < length; i++) {
+        jstring str = (jstring) (*env)->GetObjectArrayElement(env, data, i);
+        const char *strChars = (*env)->GetStringUTFChars(env, str, NULL);
+        if (i > 0) {
+            strcat(message, " ");  // Add the separator
+        }
+        strcat(message, strChars);
+        (*env)->ReleaseStringUTFChars(env, str, strChars);
+    }
+
+    //__android_log_print(ANDROID_LOG_DEBUG, "FPGA_device.c, ioctl set", "%s", message);
+
+    // Perform the ioctl operation with the message string
+    int result = ioctl(fd, SET_DATA, message);
+    if (result == -1) {
+        perror("Failed to perform ioctl");
+    }
+
+    return result;
+}
+
+JNIEXPORT jint JNICALL Java_com_example_simplesim_DeviceController_ioctlCmdSim(JNIEnv *env, jobject obj, jint fd, jstring data) {
+    const char *message = (*env)->GetStringUTFChars(env, data, NULL);
+
+    //__android_log_print(ANDROID_LOG_DEBUG, "FPGA_device.c, ioctl cmd", "%s", message);
+
+    // Perform the ioctl operation with the message string
+    int result = ioctl(fd, COMMAND, message);
+    if (result == -1) {
+        perror("Failed to perform ioctl");
+    }
+    (*env)->ReleaseStringUTFChars(env, data, message);
+
+    return result;
 }
