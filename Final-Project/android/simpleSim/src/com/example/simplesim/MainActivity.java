@@ -107,6 +107,7 @@ public class MainActivity extends ActionBarActivity {
 		Controller myController = new Controller();
 		int gearPos_idx = myCar.getPos().ordinal();
 		int guage = 0;
+		int interruptGearChange = 0;
 		boolean brakeOn = false;
 		public PlaceholderFragment() {
 		}
@@ -131,8 +132,8 @@ public class MainActivity extends ActionBarActivity {
 			speedInfo = (TextView) rootView.findViewById(R.id.speedDpTextView);
 			debug = (TextView) rootView.findViewById(R.id.debugTextView1);debug2 = (TextView) rootView.findViewById(R.id.debugTextView2);
 			
-			Button gearUpBtn = (Button) rootView.findViewById(R.id.gearUpBtn);
-			Button gearDownBtn = (Button) rootView.findViewById(R.id.gearDownBtn);
+			final Button gearUpBtn = (Button) rootView.findViewById(R.id.gearUpBtn);
+			final Button gearDownBtn = (Button) rootView.findViewById(R.id.gearDownBtn);
 			Button gearMSBtn = (Button) rootView.findViewById(R.id.gearMSBtn);
 			ToggleButton ignBtn = (ToggleButton) rootView.findViewById(R.id.ignitionBtn);
 			Button throttleBtn = (Button) rootView.findViewById(R.id.throttleBtn);
@@ -373,7 +374,17 @@ public class MainActivity extends ActionBarActivity {
 				    		String.valueOf(myCar.getPos()));
 				    //Log.d("testData", ""+testData[0]+"__"+testData[1]+"__"+testData[2]);
 					devCtrl.ioctlSetSim(fd, testData);
-
+					
+					//Gear change by interrupt button
+			        if(interruptGearChange == 1) {
+			        	gearDownBtn.performClick();
+			        	interruptGearChange = 0;
+			        }
+			        else if(interruptGearChange == 2) {
+			        	gearUpBtn.performClick();
+			        	interruptGearChange = 0;
+			        }
+			   
 				}
 			};
 			
@@ -383,8 +394,9 @@ public class MainActivity extends ActionBarActivity {
 			intRunnable = new Runnable() {
 			    @Override
 			    public void run() {
-			        int retValue = devCtrl.readInterrupt(fd2, "0000");
-			        Log.d("retValue from readInterrupt", ""+retValue);
+			    	interruptGearChange = devCtrl.readInterrupt(fd2, "0000");
+			        Log.d("retValue from readInterrupt", ""+interruptGearChange);
+			        
 			        intHandler.postDelayed(this, 10);
 			    }
 			};
