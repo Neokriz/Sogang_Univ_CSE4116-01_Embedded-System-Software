@@ -2,7 +2,6 @@ package com.example.simplesim;
 
 import android.util.Log;
 
-import com.example.simplesim.Automobile.GearPos;
 import com.example.simplesim.ShiftPatternTable;
 
 public class Controller {
@@ -12,7 +11,7 @@ public class Controller {
 	private static int ignitionProcess; // 0 is defualt(Engine OFF), 1 is ignition process, -1 is shutdown process.
 	private static int acceleratation;	// 0 is default(throttle off), 1 is pressing throttle, -1 is throttle off.
 	private static int deceleratation;	// 0 is default(barke off), 1 is brake
-
+	
     public Controller() {
     	Controller.ignitionProcess = 0;
     	Controller.acceleratation = 0;
@@ -82,8 +81,9 @@ public class Controller {
 	
 	public static int gearChange(Automobile car, int value, int dir){
 		int pos = value + dir;
-		car.setPos(Automobile.GearPos.values()[pos]);
-		
+		if(pos > 0) {
+			car.setPos(Automobile.GearPos.values()[pos]);
+		}
 		return pos;
 	}
 	
@@ -109,14 +109,19 @@ public class Controller {
 		return car.getGear();
 	}
 	
-	public static int accelerate(Automobile car, int input, int throttle) { //input is +1 or -1
+	public static int accelerate(Automobile car, int input, int throttle) { //input is +1 or 0
 		//Log.d("accelerate called", ""+throttle);
+		int[] torque= {35, 35, 35, 38, 42,
+						45, 46, 47, 48, 47, 
+						46, 44, 43, 42, 39, 
+						37, 35, 30, 25, 20};
+		
 		int gwsPosition = car.getPos().ordinal();
 		double increment;
 		double ratio =  Automobile.GearRatio.values()[car.getGear()+1].getValue();
 		if(input > 0) {
-			increment = 3 * input * ((double)throttle / 100) * ratio;
-			increment = (increment > 1) ? increment : 0;
+			increment = input * ((double)throttle / 100) * ratio * torque[car.getRpm() / 310] / 20;
+			increment = (increment >= 1) ? increment : 0;
 			//Log.d("increment", ""+increment);
 		}
 		else {
@@ -127,14 +132,17 @@ public class Controller {
 //			acceleratation = 0;
 //		}
 		
-		//if(gwsPosition > Automobile.GearPos.P.ordinal()) {
-		//increase RPM
-		car.setRpm(car.getRpm()+(int)increment);
-		if(gwsPosition == Automobile.GearPos.D.ordinal()) {
-			boolean accel = (input > 0) ? true : false;
-			driveMode(car, throttle, accel);
+		if(car.getSpeed() < 300) {
+			//increase RPM
+			car.setRpm(car.getRpm()+(int)increment);
+			if(gwsPosition == Automobile.GearPos.D.ordinal()) {
+				boolean accel = (input > 0) ? true : false;
+				driveMode(car, throttle, accel);
+			}
 		}
-		//}
+		else{
+			car.setRpm(car.getRpm()-100);
+		}
 			
 		return 1;
 	}

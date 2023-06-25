@@ -1079,8 +1079,9 @@ containing a value of this type.
         public static final int abc_textfield_searchview_right_holo_dark=0x7f020055;
         public static final int abc_textfield_searchview_right_holo_light=0x7f020056;
         public static final int ic_launcher=0x7f020057;
-        public static final int rpm=0x7f020058;
-        public static final int speed=0x7f020059;
+        public static final int needle2=0x7f020058;
+        public static final int rpm=0x7f020059;
+        public static final int speed=0x7f02005a;
     }
     public static final class id {
         public static final int action_bar=0x7f05001c;
@@ -1094,7 +1095,7 @@ containing a value of this type.
         public static final int action_menu_divider=0x7f050016;
         public static final int action_menu_presenter=0x7f050017;
         public static final int action_mode_close_button=0x7f050024;
-        public static final int action_settings=0x7f05005a;
+        public static final int action_settings=0x7f05005b;
         public static final int activity_chooser_view_content=0x7f050025;
         public static final int always=0x7f05000b;
         public static final int beginning=0x7f050011;
@@ -1139,7 +1140,6 @@ containing a value of this type.
         public static final int list_item=0x7f050029;
         public static final int mainFragRelativelayout=0x7f05003d;
         public static final int middle=0x7f050012;
-        public static final int needle=0x7f050059;
         public static final int never=0x7f050009;
         public static final int none=0x7f050010;
         public static final int normal=0x7f050000;
@@ -1147,7 +1147,8 @@ containing a value of this type.
         public static final int progress_horizontal=0x7f050019;
         public static final int radio=0x7f05002f;
         public static final int rpmDptextView=0x7f05004e;
-        public static final int rpm_background=0x7f050058;
+        public static final int rpm_background=0x7f050057;
+        public static final int rpm_needle=0x7f050059;
         public static final int search_badge=0x7f050032;
         public static final int search_bar=0x7f050031;
         public static final int search_button=0x7f050033;
@@ -1163,7 +1164,8 @@ containing a value of this type.
         public static final int showHome=0x7f050004;
         public static final int showTitle=0x7f050006;
         public static final int speedDpTextView=0x7f050053;
-        public static final int speed_background=0x7f050057;
+        public static final int speed_background=0x7f050058;
+        public static final int speed_needle=0x7f05005a;
         public static final int split_action_bar=0x7f05001e;
         public static final int submit_area=0x7f050039;
         public static final int tabMode=0x7f050002;

@@ -25,6 +25,7 @@ import android.view.MotionEvent;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -122,21 +123,11 @@ public class MainActivity extends ActionBarActivity {
 			ToggleButton ignBtn = (ToggleButton) rootView.findViewById(R.id.ignitionBtn);
 			Button throttleBtn = (Button) rootView.findViewById(R.id.throttleBtn);
 			Button brakeBtn = (Button) rootView.findViewById(R.id.brakeBtn);
-			final VerticalSeekBar throttleBar = (VerticalSeekBar) rootView.findViewById(R.id.throttleBar);;
+			final VerticalSeekBar throttleBar = (VerticalSeekBar) rootView.findViewById(R.id.throttleBar);
 
-			final Needle rpmNeedle = new Needle(getActivity());
-	        // Set layout parameters for the Needle view
-			int x = 200;
-			int y = 200;
-	        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
-	                RelativeLayout.LayoutParams.WRAP_CONTENT,
-	                RelativeLayout.LayoutParams.WRAP_CONTENT
-	        );
-	        params.leftMargin = x;
-	        params.topMargin = y;
-	        // Add the Needle view to the parent RelativeLayout with the specified layout parameters
-	        
-
+			final ImageView rpmNeedle = (ImageView) rootView.findViewById(R.id.rpm_needle);
+			final ImageView speedNeedle = (ImageView) rootView.findViewById(R.id.speed_needle);
+			
 			//gearPositon.setText(Gear.values()[gearPos_idx].name());
 			
 			// Gear Up button 
@@ -176,7 +167,7 @@ public class MainActivity extends ActionBarActivity {
 				@Override
 				public void onClick(View v) {
 					gearPos_idx = myCar.getPos().ordinal();
-					if(myCar.getEngineStat()) {
+					if(myCar.getEngineStat() && gearPos_idx > 0) {
 						if(gearPos_idx > Automobile.GearPos.R.ordinal() 
 							&& gearPos_idx <= Automobile.GearPos.D.ordinal()) {
 							gearPos_idx = Controller.gearChange(myCar, gearPos_idx, -1);
@@ -286,14 +277,8 @@ public class MainActivity extends ActionBarActivity {
 	                // Handle seek bar progress change
 	            	P_val = progress;
 	            	guage = P_val;
-	            	if(guage > 5){
-	            		myController.setAcceleratation(1);
-	            	}
-	            	else {
-	            		myController.setAcceleratation(0);
-	            	}
-	            		            	
-	            	if(progress < 20) {
+            	
+	            	if(progress < 5) {
 	            		myController.setAcceleratation(0);
 	            		//guage = 100 - (P_val) * 5;
 	            		guage = P_val;
@@ -361,8 +346,12 @@ public class MainActivity extends ActionBarActivity {
 					debug2.setText(String.valueOf(guage));
 					
 					float rpmAngle = myCar.getRpm();
-					rpmNeedle.setRotationAngle(((rpmAngle - 0) / (6200 - 0)) * (390 - 150) + 150);
-					
+					double speedAngle = myCar.getSpeed();
+					//TODO rotate needle
+					float rotationAngle = ((rpmAngle - 0) / (6200 - 5)) * (270 - 5) + 5;
+					rpmNeedle.setRotation(rotationAngle);
+					float rotationAngle2 = (((float)speedAngle - 0) / (300 - 5)) * (270 - 5) + 5;
+					speedNeedle.setRotation(rotationAngle2);
 					//throttleBar.setProgress((int)myCar.getSpeed());
 					//Log.d("testData speed", ""+myCar.getSpeed());
 				    
@@ -376,7 +365,6 @@ public class MainActivity extends ActionBarActivity {
 				}
 			};
 			
-			parentLayout.addView(rpmNeedle, params);
 			return rootView;
 		}
 		

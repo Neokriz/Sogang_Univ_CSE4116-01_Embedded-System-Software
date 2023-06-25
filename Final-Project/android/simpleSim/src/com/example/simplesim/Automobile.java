@@ -157,7 +157,7 @@ public class Automobile {
     	double finalDrive = GearRatio.FINAL.getValue();
     	
     	newRpm = speed / (3.78 * 225 * 55 + 4800 * 16) * (gearRatio * finalDrive * MILLION);
-    	Log.d("newRPM : Speed", ""+newRpm+"__"+this.rpm+"__"+this.speed);
+    	//Log.d("newRPM : Speed", ""+newRpm+"__"+this.rpm+"__"+this.speed);
     	return (int)newRpm;
     }
 	

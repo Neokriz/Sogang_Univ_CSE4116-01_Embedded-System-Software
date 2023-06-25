@@ -244,39 +244,52 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/gearDownBtn"
-        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
         android:text="debug1" />
 
     <TextView
         android:id="@+id/debugTextView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/debugTextView1"
+        android:layout_alignStart="@+id/debugTextView1"
         android:layout_below="@+id/debugTextView1"
         android:text="debug2" />
-
-    <ImageView
-        android:id="@+id/speed_background"
-        android:layout_width="250dp"
-        android:layout_height="250dp"
-        android:layout_above="@+id/ignitionBtn"
-        android:layout_toRightOf="@+id/rpm_background"
-        android:src="@drawable/speed" />
 
     <ImageView
         android:id="@+id/rpm_background"
         android:layout_width="250dp"
         android:layout_height="250sp"
+        android:layout_marginTop="4dp"
         android:layout_alignParentTop="true"
+        android:layout_toEndOf="@+id/gearMSBtn"
         android:layout_toRightOf="@+id/gearMSBtn"
         android:src="@drawable/rpm" />
 
     <ImageView
-        android:id="@+id/needle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/gearMSBtn"
-        android:layout_toLeftOf="@+id/brakeBtn"
-        android:src="@drawable/abc_ic_voice_search_api_holo_light" />
+        android:id="@+id/speed_background"
+        android:layout_width="250dp"
+        android:layout_height="250dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="2dp"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@+id/rpm_background"
+        android:layout_toRightOf="@+id/rpm_background"
+        android:src="@drawable/speed" />
+
+    <ImageView
+        android:id="@+id/rpm_needle"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_alignBottom="@+id/lineRtoN"
+        android:layout_toRightOf="@+id/rpmDptextView"
+        android:src="@drawable/needle2" />
+
+    <ImageView
+        android:id="@+id/speed_needle"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_alignLeft="@+id/brakeBtn"
+        android:layout_alignTop="@+id/rpm_needle"
+        android:src="@drawable/needle2" />
 
 </RelativeLayout>
