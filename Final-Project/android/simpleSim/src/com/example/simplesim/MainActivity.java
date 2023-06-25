@@ -3,6 +3,7 @@ package com.example.simplesim;
 import com.example.simplesim.Controller;
 import com.example.simplesim.Automobile;
 import com.example.simplesim.VerticalSeekBar;
+import com.example.simplesim.Needle;
 //import android.R;
 import com.example.simplesim.R;
 
@@ -24,6 +25,7 @@ import android.view.MotionEvent;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.ToggleButton;
@@ -76,9 +78,6 @@ public class MainActivity extends ActionBarActivity {
 	 * A placeholder fragment containing a simple view.
 	 */
 	public static class PlaceholderFragment extends Fragment {
-
-		public PlaceholderFragment() {
-		}
 		
 		TextView[] gearPositon = new TextView[5];
 		TextView rpmInfo;
@@ -94,13 +93,16 @@ public class MainActivity extends ActionBarActivity {
 		int gearPos_idx = myCar.getPos().ordinal();
 		int guage = 0;
 		boolean brakeOn = false;
-		
+		public PlaceholderFragment() {
+		}
+
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 			
 			final int textColor = getResources().getColor(R.color.BRIGHT_ORANGE);
-			View rootView = inflater.inflate(R.layout.fragment_main, container,
-					false);
+			View rootView = inflater.inflate(R.layout.fragment_main, container,	false);
+			RelativeLayout parentLayout = (RelativeLayout) rootView.findViewById(R.id.mainFragRelativelayout);
+
 			
 			//final TextView gearPositon = (TextView) rootView.findViewById(R.id.gearPTextView);
 			gearPositon[0] = (TextView) rootView.findViewById(R.id.gearPTextView);
@@ -113,7 +115,6 @@ public class MainActivity extends ActionBarActivity {
 			gearInfo = (TextView) rootView.findViewById(R.id.gearDptextView);
 			speedInfo = (TextView) rootView.findViewById(R.id.speedDpTextView);
 			debug = (TextView) rootView.findViewById(R.id.debugTextView1);debug2 = (TextView) rootView.findViewById(R.id.debugTextView2);
-
 			
 			Button gearUpBtn = (Button) rootView.findViewById(R.id.gearUpBtn);
 			Button gearDownBtn = (Button) rootView.findViewById(R.id.gearDownBtn);
@@ -123,6 +124,18 @@ public class MainActivity extends ActionBarActivity {
 			Button brakeBtn = (Button) rootView.findViewById(R.id.brakeBtn);
 			final VerticalSeekBar throttleBar = (VerticalSeekBar) rootView.findViewById(R.id.throttleBar);;
 
+			final Needle rpmNeedle = new Needle(getActivity());
+	        // Set layout parameters for the Needle view
+			int x = 200;
+			int y = 200;
+	        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+	                RelativeLayout.LayoutParams.WRAP_CONTENT,
+	                RelativeLayout.LayoutParams.WRAP_CONTENT
+	        );
+	        params.leftMargin = x;
+	        params.topMargin = y;
+	        // Add the Needle view to the parent RelativeLayout with the specified layout parameters
+	        
 
 			//gearPositon.setText(Gear.values()[gearPos_idx].name());
 			
@@ -337,6 +350,7 @@ public class MainActivity extends ActionBarActivity {
 					}
 					else {
 						Controller.idle(myCar);
+						rpmHandler.postDelayed(this, 1);
 					}
 					rpmInfo.setText(String.valueOf(myCar.getRpm()));
 					gearInfo.setText(String.valueOf(myCar.getGear()));
@@ -345,6 +359,9 @@ public class MainActivity extends ActionBarActivity {
 					//}
 					debug.setText(String.valueOf(myController.getAcceleratation()));
 					debug2.setText(String.valueOf(guage));
+					
+					float rpmAngle = myCar.getRpm();
+					rpmNeedle.setRotationAngle(((rpmAngle - 0) / (6200 - 0)) * (390 - 150) + 150);
 					
 					//throttleBar.setProgress((int)myCar.getSpeed());
 					//Log.d("testData speed", ""+myCar.getSpeed());
@@ -356,11 +373,10 @@ public class MainActivity extends ActionBarActivity {
 				    		String.valueOf(myCar.getPos()));
 				    //Log.d("testData", ""+testData[0]+"__"+testData[1]+"__"+testData[2]);
 					devCtrl.ioctlSetSim(fd, testData);
-	
 				}
 			};
 			
-
+			parentLayout.addView(rpmNeedle, params);
 			return rootView;
 		}
 		

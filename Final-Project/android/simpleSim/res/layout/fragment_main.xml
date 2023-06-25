@@ -1,5 +1,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mainFragRelativelayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingBottom="@dimen/activity_vertical_margin"
@@ -255,20 +256,27 @@
         android:text="debug2" />
 
     <ImageView
+        android:id="@+id/speed_background"
+        android:layout_width="250dp"
+        android:layout_height="250dp"
+        android:layout_above="@+id/ignitionBtn"
+        android:layout_toRightOf="@+id/rpm_background"
+        android:src="@drawable/speed" />
+
+    <ImageView
         android:id="@+id/rpm_background"
-        android:layout_width="250"
-        android:layout_height="250"
-        android:layout_alignBottom="@+id/ignitionBtn"
-        android:layout_centerHorizontal="true"
+        android:layout_width="250dp"
+        android:layout_height="250sp"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/gearMSBtn"
         android:src="@drawable/rpm" />
 
     <ImageView
-        android:id="@+id/speed_background"
-        android:layout_width="250"
-        android:layout_height="250"
-        android:layout_alignBottom="@+id/gearNTextView"
-        android:layout_alignParentTop="true"
-        android:layout_toRightOf="@+id/speedDpTextView"
-        android:src="@drawable/speed" />
+        android:id="@+id/needle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/gearMSBtn"
+        android:layout_toLeftOf="@+id/brakeBtn"
+        android:src="@drawable/abc_ic_voice_search_api_holo_light" />
 
 </RelativeLayout>

@@ -76,6 +76,7 @@ ssize_t sim_read(struct file *inode, char *gdata, size_t length, loff_t *off_wha
 //long sim_ioctl(struct file *inode, unsigned int ioctl_num, unsigned long ioctl_param) {
 
 void fnd_write(char* value);
+void led_write(void);
 void dot_write(void);
 void stm_write(void);
 
@@ -128,6 +129,8 @@ int sim_release(struct inode *minode, struct file *mfile) {
 	free_irq(gpio_to_irq(IMX_GPIO_NR(5, 14)), NULL);
 
 	sim_port_usage = 0;
+	_car_rpm = 0;
+	del_timer_sync(&dev_timer.timer);
 
 	return 0;
 }
@@ -135,30 +138,29 @@ int sim_release(struct inode *minode, struct file *mfile) {
 // when write to sim device, call this function
 ssize_t sim_write(struct file *inode, const char *gdata, size_t length, loff_t *off_what) {
 	unsigned char value_fnd[5];
-
-	const char *tmp = gdata;
+//const char *tmp = gdata;
 
 	memset(value_fnd, 0x00, sizeof(char) * 5);
 
 	//printk("log: sim_write: [0]gdata : [%s]\n", gdata);
 
 	if(USER_WRITE) {
-		printk("log: sim_write user: [1]tmp : [%s]\n", tmp);
+		//printk("log: sim_write user: [1]tmp : [%s]\n", tmp);
 		//if (copy_from_user(&value_fnd, tmp, DIGIT))
 		//return -EFAULT;
 	}
-						//strcpy(&_car_gear, str);	
 	else 
 		USER_WRITE = true;
 
 	// display rpm to FND
 	sprintf(value_fnd, "%4d", _car_rpm);
-	printk("log: sim_write: [1]value : [%s]\n", value_fnd);
+	//printk("log: sim_write: [1]value : [%s]\n", value_fnd);
 	fnd_write(value_fnd);
-	
+	// light up led according to rpm
+	led_write();	
 	// display gear on DOT matrix
 	dot_write();
-
+	// spin step motor according to rpm
 	stm_write();
 	return length;
 }
@@ -166,17 +168,41 @@ ssize_t sim_write(struct file *inode, const char *gdata, size_t length, loff_t *
 void fnd_write(char* value) {
 	unsigned short value_short = 0;
 	int i;
-
+	if(_car_rpm == 0){
+		for(i=0; i<4; ++i)
+			value[i] = 0x30;
+	}
 	for(i=0; i<4; ++i)
 		value[i] -= 0x30;
     value_short = value[0] << 12 | value[1] << 8 |value[2] << 4 |value[3];
     outw(value_short,(unsigned int)fnd_addr);	    
 }
 
+void led_write() {
+	unsigned short value_short = 0;
+	int count = _car_rpm / 740;
+	int led[8] = {16, 32, 64, 128, 1, 2, 4, 8};
+	int i;
+
+	for(i = 0; i < count; i++){
+		value_short += led[i];
+	}
+
+	if(count == 8 && dev_timer.t_sec == 0) {
+		value_short = 0;
+
+	}
+
+	outw(value_short, (unsigned int)led_addr);
+}
+
 void dot_write() {
 	char value[10];
 	unsigned short value_short = 0;
+	int redzone;
 	int i, str_size = 10;
+
+	redzone = _car_rpm > 6000 ? 1 : 0;
 
 	if(_car_rpm) {
 		switch (_car_gear) {
@@ -193,11 +219,16 @@ void dot_write() {
 				memcpy(value, fpga_gear[3], sizeof(char)*10);
 				break;
 			default :
-				memcpy(value, fpga_number[_car_rpm - '0'], sizeof(char)*10);
+				memcpy(value, fpga_number[_car_gear - '0'], sizeof(char)*10);
 		}
 	}
 	else 
 		memcpy(value, fpga_set_blank, sizeof(char)*10);
+
+	if(redzone && dev_timer.t_sec == 1) {
+		memcpy(value, fpga_set_blank, sizeof(char)*10);
+	}
+
 	for(i=0; i<str_size; ++i) {
 		//printk("%02x ", value_d[i]);//
 		value_short = value[i] & 0x7F;
@@ -213,9 +244,9 @@ void stm_write() {
 	input_range = 6500;
 	motor_range = 250;
 
-	value[0] = 1;
+	value[0] = _car_rpm > 0 ? 1 : 0;
 	value[1] = 1;
-	value[2] = ((_car_rpm) * (-250) / 6500) + 250;
+	value[2] = ((_car_rpm) * (-150) / 6300) + 150;
 
     value_short = value[0] & 0xF;
     outw(value_short,(unsigned int)stm_addr);
@@ -236,10 +267,11 @@ static void kernel_timer_repeat(unsigned long tdata) {
 	struct device_timer *t_ptr = (struct device_timer*)tdata;
 	int len = DIGIT;
 	char data[4];
+	int sec = t_ptr->t_sec;
 
-	_car_rpm++;
+	t_ptr->t_sec = sec > 1 ? 0 : sec + 1 ;
+
 	sprintf(data, "%4d", _car_rpm);
-	printk("repeat%d\n", t_ptr->t_sec);
 	sim_write(t_ptr->inode, data, len, NULL);
 	t_ptr->timer.expires = get_jiffies_64() + (1 * HZ) / 10;
 	t_ptr->timer.data = (unsigned long)t_ptr;
@@ -264,7 +296,7 @@ long sim_ioctl(struct file *inode, unsigned int ioctl_num, unsigned long ioctl_p
 			if(copy_from_user(&msg, tmp, sizeof(char)*len))
 				return -EFAULT;
 
-			printk("log: iom_dev_ioctl: [1]msg : [%s]\n", msg);
+			//printk("log: iom_dev_ioctl: [1]msg : [%s]\n", msg);
 
 			str = in_msg;
 			while(str != NULL) {
@@ -291,7 +323,7 @@ long sim_ioctl(struct file *inode, unsigned int ioctl_num, unsigned long ioctl_p
 					}
 				}
 			}
-			printk("log: iom_dev_ioctl: [2]\n\t\t_car_rpm:%d,\n\t\t_car_speed:%d,\n\t\t_car_gear:%c\n\n", _car_rpm, _car_speed, _car_gear);
+			//printk("log: iom_dev_ioctl: [2]\n\t\t_car_rpm:%d,\n\t\t_car_speed:%d,\n\t\t_car_gear:%c\n\n", _car_rpm, _car_speed, _car_gear);
 
 			break;
 		}
@@ -311,11 +343,12 @@ long sim_ioctl(struct file *inode, unsigned int ioctl_num, unsigned long ioctl_p
 
 			del_timer_sync(&dev_timer.timer);
 
+			dev_timer.inode = inode;
+			dev_timer.t_sec = 0;
 			dev_timer.timer.expires = get_jiffies_64() + (0 * HZ);
 			dev_timer.timer.data = (unsigned long)&dev_timer;
 			dev_timer.timer.function = kernel_timer_repeat;
 
-			printk("timer add\n");
 			add_timer(&dev_timer.timer);
 
 			//printk("log: iom_dev_ioctl: [2]_command: %d\n", _command);
@@ -374,6 +407,8 @@ int __init sim_init(void) {
 	dot_addr = ioremap(DOT_ADDRESS, 0x10);
 	lcd_addr = ioremap(LCD_ADDRESS, 0x32);
 	stm_addr = ioremap(STM_ADDRESS, 0x4);
+	
+	init_timer(&dev_timer.timer);
 
 	printk(KERN_ALERT "Init module, %s Major number : %d\n", DEV_NAME, MAJOR_NUM);
 	return 0;
@@ -386,9 +421,10 @@ void __exit sim_exit(void) {
 	iounmap(lcd_addr);
 	iounmap(stm_addr);
 
+	sim_port_usage = 0;
+	del_timer(&dev_timer.timer);
 	unregister_chrdev(MAJOR_NUM, DEV_NAME);
 
-	sim_port_usage = 0;
 	printk(KERN_ALERT "Remove Module Success \n");
 }
 
