@@ -38,13 +38,13 @@ public class MainActivity extends ActionBarActivity {
 	public static int fd, fd2;
 	public static String[] testData = new String[3];
 	
-	Handler iHandler = new Handler() {
-		public void handleInterrupt(Message msg) {
-			if(msg.what==0){
-				
-			}
-		}
-	};
+//	Handler iHandler = new Handler() {
+//		public void handleInterrupt(Message msg) {
+//			if(msg.what==0){
+//				
+//			}
+//		}
+//	};
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -62,19 +62,16 @@ public class MainActivity extends ActionBarActivity {
 		fd2 = devCtrl.openSimInt();
 	    if (fd == -1) {
 	    	System.out.print("file1 open error");
+		    Log.d("2 device1 opened error", "");
 	    }
 	    else if (fd2 == -1) {
 	    	System.out.print("file2 open error");
+		    Log.d("2 device2 opened  error", "");
 	    }
 	    Log.d("2 device opened without error", "");
 		devCtrl.ioctlCmdSim(fd, String.valueOf(0));
 		//devCtrl.readInterrupt(fd2, String.valueOf(0));
-		
-		InterruptDetector iDetector;
-		iDetector = new InterruptDetector(iHandler);
-		iDetector.setDaemon(true);
-		iDetector.start();
-		
+				
 	}
 
 	@Override
@@ -148,6 +145,11 @@ public class MainActivity extends ActionBarActivity {
 
 			final ImageView rpmNeedle = (ImageView) rootView.findViewById(R.id.rpm_needle);
 			final ImageView speedNeedle = (ImageView) rootView.findViewById(R.id.speed_needle);
+			
+			InterruptDetector iDetector;
+			iDetector = new InterruptDetector();
+			iDetector.setDaemon(true);
+			iDetector.start();
 			
 			//gearPositon.setText(Gear.values()[gearPos_idx].name());
 			

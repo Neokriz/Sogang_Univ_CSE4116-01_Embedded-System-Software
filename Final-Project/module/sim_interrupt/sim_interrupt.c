@@ -19,11 +19,9 @@
 
 #include "./sim_interrupt.h"
 
-static int result;
+//static int result;
 static int sim_int_port_usage;
-static dev_t inter_dev;
 
-static struct cdev inter_cdev;
 int sim_int_open(struct inode *, struct file *);
 int sim_int_release(struct inode *, struct file *);
 int sim_int_write(struct file *inode, const char *gdata, size_t length, loff_t *off_what);
@@ -50,6 +48,7 @@ irqreturn_t inter_handler_VM(int irq, void* dev_id) {
 
 	interruptNumber = 1;
 	if(interruptNumber == 1) {
+		interruptNumber = 0;
 		__wake_up(&wq_read, 1, 1, NULL);	
 		printk("wake up\n");
 	}
@@ -87,7 +86,7 @@ int sim_int_open(struct inode *minode, struct file *mfile) {
 	gpio_direction_input(IMX_GPIO_NR(5,14));
 	irq = gpio_to_irq(IMX_GPIO_NR(5,14));
 	printk(KERN_ALERT "IRQ Number : %d\n",irq);
-	ret=request_irq(irq, inter_handler_VM, IRQF_TRIGGER_FALLING | IRQF_TRIGGER_RISING, "voldown", 0);
+	ret=request_irq(irq, inter_handler_VM, IRQF_TRIGGER_FALLING, "voldown", 0);
 
 	return 0;
 }
@@ -104,13 +103,7 @@ int sim_int_release(struct inode *minode, struct file *mfile) {
 
 // when write to sim interrupt device, call this function
 int sim_int_write(struct file *inode, const char *gdata, size_t length, loff_t *off_what) {
-	if(interruptCount == 0) {
-		printk("sim_interrupt sleep on\n");
-		interruptible_sleep_on(&wq_read);
-	}
-	printk("sim_interrupt read\n");
-
-	return interruptNumber;
+	return length;
 }
 
 // when read to sim interrupt device, call this function
@@ -130,33 +123,6 @@ int sim_int_read(struct file *inode, char *gdata, size_t length, loff_t *off_wha
 	return interruptNumber;
 }
 
-// register interrupt
-static int inter_register_cdev(void)
-{
-	int error;
-	int inter_major;
-	if(MAJOR_NUM) {
-		inter_dev = MKDEV(MAJOR_NUM, MINOR_NUM);
-		error = register_chrdev_region(inter_dev,1,"sim_inter");
-	}else{
-		error = alloc_chrdev_region(&inter_dev,MINOR_NUM,1,"sim_inter");
-		inter_major = MAJOR(inter_dev);
-	}
-	if(error<0) {
-		printk(KERN_WARNING "inter: can't get major %d\n", MAJOR_NUM);
-		return result;
-	}
-	printk(KERN_ALERT "major number = %d\n", MAJOR_NUM);
-	cdev_init(&inter_cdev, &sim_int_fops);
-	inter_cdev.owner = THIS_MODULE;
-	inter_cdev.ops = &sim_int_fops;
-	error = cdev_add(&inter_cdev, inter_dev, 1);
-	if(error)
-		printk(KERN_NOTICE "inter Register Error %d\n", error);
-
-	return 0;
-}
-
 int __init sim_int_init(void) {
 	int result;
     struct path file_path;
@@ -165,13 +131,11 @@ int __init sim_int_init(void) {
 
     const char *module_path = "/dev/sim_interrupt";
 	result = register_chrdev(MAJOR_NUM, DEV_NAME, &sim_int_fops);
-	if(result < 0)
+	if(result < 0) {
 		printk(KERN_WARNING"Can't get any major\n");
-		 return result;
-/*
-	if((result = inter_register_cdev()) < 0)
-		 return result;
-*/
+		return result;
+	}
+
     perm_ret = kern_path(module_path, 0, &file_path);
     if (perm_ret != 0) {
         pr_err("Failed to get path for driver file\n");

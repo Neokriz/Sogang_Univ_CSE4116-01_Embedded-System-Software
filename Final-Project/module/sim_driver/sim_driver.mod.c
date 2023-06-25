@@ -29,9 +29,6 @@ __attribute__((section("__versions"))) = {
 	{ 0x7b151d74, "kern_path" },
 	{ 0x3c2c5af5, "sprintf" },
 	{ 0xa170bbdb, "outer_cache" },
-	{ 0xd6b8e852, "request_threaded_irq" },
-	{ 0x65d6d0f0, "gpio_direction_input" },
-	{ 0x47229b5c, "gpio_request" },
 	{ 0xf0fdf6cb, "__stack_chk_fail" },
 	{ 0xfa2a45e, "__memzero" },
 	{ 0x27e1a049, "printk" },
@@ -42,7 +39,6 @@ __attribute__((section("__versions"))) = {
 	{ 0xfbc74f64, "__copy_from_user" },
 	{ 0x8f678b07, "__stack_chk_guard" },
 	{ 0xf7b574c2, "del_timer_sync" },
-	{ 0xf20dabd8, "free_irq" },
 	{ 0xefd6cf06, "__aeabi_unwind_cpp_pr0" },
 };
 

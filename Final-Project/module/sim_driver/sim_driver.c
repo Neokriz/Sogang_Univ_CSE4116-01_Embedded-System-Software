@@ -82,51 +82,18 @@ void stm_write(void);
 
 static void kernel_timer_repeat(unsigned long);
 
-// interrupt handlers...
-irqreturn_t inter_handler_VP(int irq, void* dev_id);
-irqreturn_t inter_handler_VM(int irq, void* dev_id);
-
-irqreturn_t inter_handler_VP(int irq, void* dev_id) {
-
-	return IRQ_HANDLED;
-}
-
-irqreturn_t inter_handler_VM(int irq, void* dev_id) {
-	
-	return IRQ_HANDLED;
-}
-
 // when sim device open ,call this function
 int sim_open(struct inode *minode, struct file *mfile) {
-	int ret;
-	int irq;
 
 	if(sim_port_usage != 0) return -EBUSY;
 
 	sim_port_usage = 1;
-	
-	// int1
-	gpio_request(IMX_GPIO_NR(2,15), "GPIO_volup");
-	gpio_direction_input(IMX_GPIO_NR(2,15));
-	irq = gpio_to_irq(IMX_GPIO_NR(2,15));
-	printk(KERN_ALERT "IRQ Number : %d\n",irq);
-	ret=request_irq(irq, inter_handler_VP, IRQF_TRIGGER_FALLING, "volup", 0);
-
-	// int2
-	gpio_request(IMX_GPIO_NR(5,14), "GPIO_voldown");
-	gpio_direction_input(IMX_GPIO_NR(5,14));
-	irq = gpio_to_irq(IMX_GPIO_NR(5,14));
-	printk(KERN_ALERT "IRQ Number : %d\n",irq);
-	ret=request_irq(irq, inter_handler_VM, IRQF_TRIGGER_FALLING | IRQF_TRIGGER_RISING, "voldown", 0);
 
 	return 0;
 }
 
 // when sim device close, call this function
 int sim_release(struct inode *minode, struct file *mfile) {
-
-	free_irq(gpio_to_irq(IMX_GPIO_NR(2, 15)), NULL);
-	free_irq(gpio_to_irq(IMX_GPIO_NR(5, 14)), NULL);
 
 	sim_port_usage = 0;
 	_car_rpm = 0;

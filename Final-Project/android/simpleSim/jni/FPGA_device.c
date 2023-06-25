@@ -101,8 +101,10 @@ JNIEXPORT jint JNICALL Java_com_example_simplesim_DeviceController_readInterrupt
 	char readBuffer[10];
     const char *dataToDevice = (*env)->GetStringUTFChars(env, data, NULL);
 
-    result = read(fd, readBuffer, sizeof(readBuffer) - 1);
 
 	__android_log_print(ANDROID_LOG_DEBUG, "FPGA_decice.c, interrupt", "%d", result);
+
+    result = read(fd, readBuffer, sizeof(readBuffer) - 1);
+
 	return result;
 }
