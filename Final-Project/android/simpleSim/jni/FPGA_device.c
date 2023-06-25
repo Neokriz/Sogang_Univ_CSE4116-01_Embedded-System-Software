@@ -71,7 +71,6 @@ JNIEXPORT jint JNICALL Java_com_example_simplesim_DeviceController_ioctlCmdSim(J
     const char *message = (*env)->GetStringUTFChars(env, data, NULL);
 
     //__android_log_print(ANDROID_LOG_DEBUG, "FPGA_device.c, ioctl cmd", "%s", message);
-
     // Perform the ioctl operation with the message string
     int result = ioctl(fd, COMMAND, message);
     if (result == -1) {
@@ -80,4 +79,30 @@ JNIEXPORT jint JNICALL Java_com_example_simplesim_DeviceController_ioctlCmdSim(J
     (*env)->ReleaseStringUTFChars(env, data, message);
 
     return result;
+}
+
+JNIEXPORT jint JNICALL Java_com_example_simplesim_DeviceController_openSimInt(JNIEnv *env, jobject obj) {
+    int fd = open("/dev/sim_interrupt", O_RDWR);
+    if (fd == -1) {
+        perror("Failed to open device2");
+    }
+    return fd;
+}
+
+JNIEXPORT jint JNICALL Java_com_example_simplesim_DeviceController_closeSimInt(JNIEnv *env, jobject obj, jint fd) {
+	int ret = close(fd);
+
+    return ret;
+}
+
+
+JNIEXPORT jint JNICALL Java_com_example_simplesim_DeviceController_readInterrupt(JNIEnv *env, jobject obj, jint fd, jstring data) {
+	int result;
+	char readBuffer[10];
+    const char *dataToDevice = (*env)->GetStringUTFChars(env, data, NULL);
+
+    result = read(fd, readBuffer, sizeof(readBuffer) - 1);
+
+	__android_log_print(ANDROID_LOG_DEBUG, "FPGA_decice.c, interrupt", "%d", result);
+	return result;
 }

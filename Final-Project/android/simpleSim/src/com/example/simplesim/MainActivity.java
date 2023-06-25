@@ -4,12 +4,14 @@ import com.example.simplesim.Controller;
 import com.example.simplesim.Automobile;
 import com.example.simplesim.VerticalSeekBar;
 import com.example.simplesim.Needle;
+import com.example.simplesim.InterruptDetector;
 //import android.R;
 import com.example.simplesim.R;
 
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.Fragment; 
 //import android.support.v4.content.ContextCompat;
 //import android.annotation.SuppressLint;
@@ -33,8 +35,16 @@ import android.widget.ToggleButton;
 
 public class MainActivity extends ActionBarActivity {
 	public static DeviceController devCtrl = new DeviceController();
-	public static int fd;
+	public static int fd, fd2;
 	public static String[] testData = new String[3];
+	
+	Handler iHandler = new Handler() {
+		public void handleInterrupt(Message msg) {
+			if(msg.what==0){
+				
+			}
+		}
+	};
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -49,10 +59,21 @@ public class MainActivity extends ActionBarActivity {
 
         // Close the device
 		fd = devCtrl.openSim();
+		fd2 = devCtrl.openSimInt();
 	    if (fd == -1) {
-	    	System.out.print("file open error");
+	    	System.out.print("file1 open error");
 	    }
+	    else if (fd2 == -1) {
+	    	System.out.print("file2 open error");
+	    }
+	    Log.d("2 device opened without error", "");
 		devCtrl.ioctlCmdSim(fd, String.valueOf(0));
+		//devCtrl.readInterrupt(fd2, String.valueOf(0));
+		
+		InterruptDetector iDetector;
+		iDetector = new InterruptDetector(iHandler);
+		iDetector.setDaemon(true);
+		iDetector.start();
 		
 	}
 
@@ -348,9 +369,9 @@ public class MainActivity extends ActionBarActivity {
 					float rpmAngle = myCar.getRpm();
 					double speedAngle = myCar.getSpeed();
 					//TODO rotate needle
-					float rotationAngle = ((rpmAngle - 0) / (6200 - 5)) * (270 - 5) + 5;
+					float rotationAngle = ((rpmAngle - 0) / (6200 - 5)) * (280 - 5) + 5;
 					rpmNeedle.setRotation(rotationAngle);
-					float rotationAngle2 = (((float)speedAngle - 0) / (300 - 5)) * (270 - 5) + 5;
+					float rotationAngle2 = (((float)speedAngle - 0) / (300 - 5)) * (280 - 5) + 5;
 					speedNeedle.setRotation(rotationAngle2);
 					//throttleBar.setProgress((int)myCar.getSpeed());
 					//Log.d("testData speed", ""+myCar.getSpeed());
@@ -386,6 +407,7 @@ public class MainActivity extends ActionBarActivity {
 
 	        // Close the device
 	        devCtrl.closeSim(fd);
+	        devCtrl.closeSimInt(fd2);
 	    }
 
 	}
