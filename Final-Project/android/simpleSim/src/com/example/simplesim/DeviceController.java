@@ -9,5 +9,5 @@ public class DeviceController {
 	
 	public native int openSimInt();
 	public native int closeSimInt(int fd);
-	public native static int readInterrupt(int fd, String data);
+	public native int readInterrupt(int fd, String data);
 }

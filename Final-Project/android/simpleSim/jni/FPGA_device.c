@@ -98,13 +98,11 @@ JNIEXPORT jint JNICALL Java_com_example_simplesim_DeviceController_closeSimInt(J
 
 JNIEXPORT jint JNICALL Java_com_example_simplesim_DeviceController_readInterrupt(JNIEnv *env, jobject obj, jint fd, jstring data) {
 	int result;
-	char readBuffer[10];
+	char readBuffer[2] = {0,0};
     const char *dataToDevice = (*env)->GetStringUTFChars(env, data, NULL);
 
-
-	__android_log_print(ANDROID_LOG_DEBUG, "FPGA_decice.c, interrupt", "%d", result);
-
-    result = read(fd, readBuffer, sizeof(readBuffer) - 1);
+    result = read(fd, readBuffer, sizeof(readBuffer));
+	//__android_log_print(ANDROID_LOG_DEBUG, "FPGA_decice.c, interrupt", "%d", result);
 
 	return result;
 }

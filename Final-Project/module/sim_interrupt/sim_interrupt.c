@@ -38,29 +38,32 @@ irqreturn_t inter_handler_VP(int irq, void* dev_id);
 irqreturn_t inter_handler_VM(int irq, void* dev_id);
 
 irqreturn_t inter_handler_VP(int irq, void* dev_id) {
-	printk(KERN_ALERT "interrupt VP!!! = %x\n", gpio_get_value(IMX_GPIO_NR(2, 15)));
-	
+	//printk(KERN_ALERT "interrupt VP!!! = %x\n", gpio_get_value(IMX_GPIO_NR(2, 15)));
+	interruptNumber = 1;
+	if(interruptCount==1) {
+		interruptCount = 0;
+		__wake_up(&wq_read, 1, 1, NULL);	
+		printk("wake up1\n");
+	}
 	return IRQ_HANDLED;
 }
 
 irqreturn_t inter_handler_VM(int irq, void* dev_id) {
-	printk(KERN_ALERT "interrupt VM... = %x\n", gpio_get_value(IMX_GPIO_NR(2, 15)));
-
-	interruptNumber = 1;
-	if(interruptNumber == 1) {
-		interruptNumber = 0;
+	//printk(KERN_ALERT "interrupt VM... = %x\n", gpio_get_value(IMX_GPIO_NR(2, 15)));
+	interruptNumber = 2;
+	if(interruptCount==1) {
+		interruptCount = 0;
 		__wake_up(&wq_read, 1, 1, NULL);	
-		printk("wake up\n");
+		printk("wake up2\n");
 	}
-	
 	return IRQ_HANDLED;
 }
 
 // define file_operations structure 
 struct file_operations sim_int_fops = {
 	.owner		=	THIS_MODULE,
-	.open		=	sim_int_open,
 	.release	=	sim_int_release,
+	.open		=	sim_int_open,
 	.read		=	sim_int_read,	
 	.write		=	sim_int_write,	
 };
@@ -113,12 +116,13 @@ int sim_int_read(struct file *inode, char *gdata, size_t length, loff_t *off_wha
 	unsigned short value_short;
 	char *tmp = gdata;
 	*/
-
+	interruptNumber = 0;
 	if(interruptCount == 0) {
+		interruptCount = 1;
 		printk("sim_interrupt sleep on\n");
 		interruptible_sleep_on(&wq_read);
 	}
-	printk("sim_interrupt read\n");
+	//printk("sim_interrupt read\n");
 
 	return interruptNumber;
 }

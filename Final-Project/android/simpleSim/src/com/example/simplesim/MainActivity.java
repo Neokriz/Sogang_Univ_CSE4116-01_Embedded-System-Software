@@ -11,6 +11,7 @@ import com.example.simplesim.R;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Message;
 import android.support.v4.app.Fragment; 
 //import android.support.v4.content.ContextCompat;
@@ -37,15 +38,7 @@ public class MainActivity extends ActionBarActivity {
 	public static DeviceController devCtrl = new DeviceController();
 	public static int fd, fd2;
 	public static String[] testData = new String[3];
-	
-//	Handler iHandler = new Handler() {
-//		public void handleInterrupt(Message msg) {
-//			if(msg.what==0){
-//				
-//			}
-//		}
-//	};
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -69,9 +62,10 @@ public class MainActivity extends ActionBarActivity {
 		    Log.d("2 device2 opened  error", "");
 	    }
 	    Log.d("2 device opened without error", "");
+	    
 		devCtrl.ioctlCmdSim(fd, String.valueOf(0));
 		//devCtrl.readInterrupt(fd2, String.valueOf(0));
-				
+
 	}
 
 	@Override
@@ -106,6 +100,8 @@ public class MainActivity extends ActionBarActivity {
 		
 		Handler rpmHandler;
 		Runnable rpmRunnable;
+		Handler intHandler;
+		Runnable intRunnable;
 		
 		Automobile myCar = new Automobile();
 		Controller myController = new Controller();
@@ -114,7 +110,7 @@ public class MainActivity extends ActionBarActivity {
 		boolean brakeOn = false;
 		public PlaceholderFragment() {
 		}
-
+		
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 			
@@ -145,11 +141,6 @@ public class MainActivity extends ActionBarActivity {
 
 			final ImageView rpmNeedle = (ImageView) rootView.findViewById(R.id.rpm_needle);
 			final ImageView speedNeedle = (ImageView) rootView.findViewById(R.id.speed_needle);
-			
-			InterruptDetector iDetector;
-			iDetector = new InterruptDetector();
-			iDetector.setDaemon(true);
-			iDetector.start();
 			
 			//gearPositon.setText(Gear.values()[gearPos_idx].name());
 			
@@ -339,27 +330,24 @@ public class MainActivity extends ActionBarActivity {
 				public void run(){
 					if(myController.getIgnitionprocess() == 1) {
 						Controller.engineStart(myCar);
-						rpmHandler.postDelayed(this, 1);
 					}
 					else if(myController.getIgnitionprocess() == -1) {
 						Controller.engineShutdown(myCar);
-						rpmHandler.postDelayed(this, 1);
 					}
 					else if(myController.getAcceleratation() == 1) {
 						Controller.accelerate(myCar, 1, guage);
-						rpmHandler.postDelayed(this, 1);
 					}
 					else if(myController.getAcceleratation() == 0) {
 						if(myCar.getRpm() < 770){
 							Controller.idle(myCar);
 						}
 						Controller.accelerate(myCar, -1, guage);
-						rpmHandler.postDelayed(this, 1);
 					}
 					else {
 						Controller.idle(myCar);
-						rpmHandler.postDelayed(this, 1);
 					}
+					rpmHandler.postDelayed(this, 10);
+					
 					rpmInfo.setText(String.valueOf(myCar.getRpm()));
 					gearInfo.setText(String.valueOf(myCar.getGear()));
 					//if(myCar.getPos() != Automobile.GearPos.P && myCar.getPos() != Automobile.GearPos.N) {
@@ -385,8 +373,24 @@ public class MainActivity extends ActionBarActivity {
 				    		String.valueOf(myCar.getPos()));
 				    //Log.d("testData", ""+testData[0]+"__"+testData[1]+"__"+testData[2]);
 					devCtrl.ioctlSetSim(fd, testData);
+
 				}
 			};
+			
+			HandlerThread intThread = new HandlerThread("IntThread");
+			intThread.start();
+			intHandler = new Handler(intThread.getLooper());
+			intRunnable = new Runnable() {
+			    @Override
+			    public void run() {
+			        int retValue = devCtrl.readInterrupt(fd2, "0000");
+			        Log.d("retValue from readInterrupt", ""+retValue);
+			        intHandler.postDelayed(this, 10);
+			    }
+			};
+			
+			rpmHandler.post(rpmRunnable);
+			intHandler.post(intRunnable);
 			
 			return rootView;
 		}
@@ -394,13 +398,15 @@ public class MainActivity extends ActionBarActivity {
 	    @Override
 		public void onResume() {
 	        super.onResume();
-	        rpmHandler.postDelayed(rpmRunnable, 100); // Start the update loop
+	        rpmHandler.postDelayed(rpmRunnable, 10); // Start the update loop
+	        intHandler.postDelayed(intRunnable, 100); 	// Stop the update loop
 	    }
 
 	    @Override
 		public void onPause() {
 	        super.onPause();
 	        rpmHandler.removeCallbacks(rpmRunnable); // Stop the update loop
+	        intHandler.removeCallbacks(intRunnable); // Stop the update loop
 	    }
 	    
 	    @Override
