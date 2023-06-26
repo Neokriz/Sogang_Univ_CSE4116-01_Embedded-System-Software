@@ -1,5 +1,7 @@
 package com.example.simplesim;
 
+import java.util.Random;
+
 import android.util.Log;
 
 import com.example.simplesim.ShiftPatternTable;
@@ -15,6 +17,7 @@ public class Controller {
     public Controller() {
     	Controller.ignitionProcess = 0;
     	Controller.acceleratation = 0;
+    	Controller.deceleratation = 0;
     }
 	
 	public int getIgnitionprocess() {
@@ -81,7 +84,7 @@ public class Controller {
 	
 	public static int gearChange(Automobile car, int value, int dir){
 		int pos = value + dir;
-		if(pos > 0) {
+		if(pos >= 0) {
 			car.setPos(Automobile.GearPos.values()[pos]);
 		}
 		return pos;
@@ -120,7 +123,7 @@ public class Controller {
 		double increment;
 		double ratio =  Automobile.GearRatio.values()[car.getGear()+1].getValue();
 		if(input > 0) {
-			increment = input * ((double)throttle / 100) * ratio * torque[car.getRpm() / 310] / 20;
+			increment = input * ((double)throttle / 100) * ratio * torque[car.getRpm() / 320] / 20;
 			increment = (increment >= 1) ? increment : 0;
 			//Log.d("increment", ""+increment);
 		}
@@ -141,10 +144,19 @@ public class Controller {
 			}
 		}
 		else{
-			car.setRpm(car.getRpm()-100);
+			//limit speed
+			Random random = new Random();
+			car.setRpm(car.getRpm()-random.nextInt(81));
 		}
 			
 		return 1;
+	}
+	
+	public static void deceleratation(Automobile car, boolean brakeOn) {
+		if(brakeOn) {
+			accelerate(car, -1, 100);
+		}
+		
 	}
 	
 	public static void driveMode(Automobile car, int throttle, boolean accel) {
@@ -196,4 +208,5 @@ public class Controller {
 		
 		
 	}
+
 }

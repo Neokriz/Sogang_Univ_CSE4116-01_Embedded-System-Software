@@ -3,8 +3,8 @@ package com.example.simplesim;
 import com.example.simplesim.Controller;
 import com.example.simplesim.Automobile;
 import com.example.simplesim.VerticalSeekBar;
-import com.example.simplesim.Needle;
-import com.example.simplesim.InterruptDetector;
+//import com.example.simplesim.Needle;
+//import com.example.simplesim.InterruptDetector;
 //import android.R;
 import com.example.simplesim.R;
 
@@ -134,7 +134,8 @@ public class MainActivity extends ActionBarActivity {
 			
 			final Button gearUpBtn = (Button) rootView.findViewById(R.id.gearUpBtn);
 			final Button gearDownBtn = (Button) rootView.findViewById(R.id.gearDownBtn);
-			Button gearMSBtn = (Button) rootView.findViewById(R.id.gearMSBtn);
+			Button gearMSBtn = (Button) rootView.findViewById(R.id.new_gearMSBtn);
+			Button dummy_gearMSBtn = (Button) rootView.findViewById(R.id.gearMSBtn);
 			ToggleButton ignBtn = (ToggleButton) rootView.findViewById(R.id.ignitionBtn);
 			Button throttleBtn = (Button) rootView.findViewById(R.id.throttleBtn);
 			Button brakeBtn = (Button) rootView.findViewById(R.id.brakeBtn);
@@ -142,8 +143,15 @@ public class MainActivity extends ActionBarActivity {
 
 			final ImageView rpmNeedle = (ImageView) rootView.findViewById(R.id.rpm_needle);
 			final ImageView speedNeedle = (ImageView) rootView.findViewById(R.id.speed_needle);
+			final ImageView accelPedal = (ImageView) rootView.findViewById(R.id.accel_img);
+			final ImageView brakePedal = (ImageView) rootView.findViewById(R.id.brake_img);
+			final ImageView engineBtn_blue = (ImageView) rootView.findViewById(R.id.engine_button_blue);
+			final ImageView brakeLamp_off = (ImageView) rootView.findViewById(R.id.brake_lamp_off);
 			
-			//gearPositon.setText(Gear.values()[gearPos_idx].name());
+			engineBtn_blue.setVisibility(View.INVISIBLE);
+			dummy_gearMSBtn.setVisibility(View.INVISIBLE);
+			
+			brakeLamp_off.setColorFilter(Color.argb(10, 0, 0, 0));
 			
 			// Gear Up button 
 			gearUpBtn.setOnClickListener(new View.OnClickListener() {
@@ -183,8 +191,8 @@ public class MainActivity extends ActionBarActivity {
 				public void onClick(View v) {
 					gearPos_idx = myCar.getPos().ordinal();
 					if(myCar.getEngineStat() && gearPos_idx > 0) {
-						if(gearPos_idx > Automobile.GearPos.R.ordinal() 
-							&& gearPos_idx <= Automobile.GearPos.D.ordinal()) {
+						if(gearPos_idx == Automobile.GearPos.N.ordinal() 
+							|| gearPos_idx == Automobile.GearPos.D.ordinal()) {
 							gearPos_idx = Controller.gearChange(myCar, gearPos_idx, -1);
 							Log.d("gearDown", ""+myCar.getPos()+"(gearPos_idx:"+gearPos_idx+")");
 							for(int i=0; i<5; ++i){
@@ -233,12 +241,14 @@ public class MainActivity extends ActionBarActivity {
 				@Override
 				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 					if(isChecked) {
+						engineBtn_blue.setVisibility(View.VISIBLE);
 						myController.setIgnitionprocess(1);
 						Controller.ignite(myCar, true);
 						Log.d("Gear positon:", ""+myCar.getPos());
 						gearPositon[myCar.getPos().ordinal()].setTextColor(textColor);
 					}
 					else {
+						engineBtn_blue.setVisibility(View.INVISIBLE);
 						myController.setIgnitionprocess(-1);
 						Controller.ignite(myCar, false);			
 						for(int i=0; i<5; ++i){
@@ -255,12 +265,14 @@ public class MainActivity extends ActionBarActivity {
 			        if (event.getAction() == MotionEvent.ACTION_DOWN) {
 						if(myCar.getEngineStat()){
 							myController.setAcceleratation(1);
+			                accelPedal.setColorFilter(Color.argb(150, 0, 0, 0));
 							guage = 100;
 						}
 			            return true;
 			        } else if (event.getAction() == MotionEvent.ACTION_UP) {
 						if(myCar.getEngineStat()){
 							myController.setAcceleratation(0);
+							accelPedal.setColorFilter(0);
 							guage = 0;
 						}
 			            return true;
@@ -274,10 +286,14 @@ public class MainActivity extends ActionBarActivity {
 				public boolean onTouch(View v, MotionEvent event) {
 			        if (event.getAction() == MotionEvent.ACTION_DOWN) {
 			        	myController.setDeceleration(1);
+		                brakePedal.setColorFilter(Color.argb(150, 0, 0, 0));
+		                brakeLamp_off.setVisibility(View.INVISIBLE);
 			        	brakeOn = true;
 			            return true;
 			        } else if (event.getAction() == MotionEvent.ACTION_UP) {
 			        	myController.setDeceleration(0);
+			        	brakePedal.setColorFilter(0);
+		                brakeLamp_off.setVisibility(View.VISIBLE);
 			        	brakeOn = false;
 			            return true;
 			        }
@@ -334,6 +350,9 @@ public class MainActivity extends ActionBarActivity {
 					}
 					else if(myController.getIgnitionprocess() == -1) {
 						Controller.engineShutdown(myCar);
+					}
+					else if(myController.getDeceleratation() == 1) {
+						Controller.deceleratation(myCar, brakeOn);
 					}
 					else if(myController.getAcceleratation() == 1) {
 						Controller.accelerate(myCar, 1, guage);
@@ -395,9 +414,9 @@ public class MainActivity extends ActionBarActivity {
 			    @Override
 			    public void run() {
 			    	interruptGearChange = devCtrl.readInterrupt(fd2, "0000");
-			        Log.d("retValue from readInterrupt", ""+interruptGearChange);
+			        //Log.d("retValue from readInterrupt", ""+interruptGearChange);
 			        
-			        intHandler.postDelayed(this, 10);
+			        intHandler.postDelayed(this, 100);
 			    }
 			};
 			

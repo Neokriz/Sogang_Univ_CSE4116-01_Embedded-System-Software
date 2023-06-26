@@ -70,7 +70,7 @@ JNIEXPORT jint JNICALL Java_com_example_simplesim_DeviceController_ioctlSetSim(J
 JNIEXPORT jint JNICALL Java_com_example_simplesim_DeviceController_ioctlCmdSim(JNIEnv *env, jobject obj, jint fd, jstring data) {
     const char *message = (*env)->GetStringUTFChars(env, data, NULL);
 
-    //__android_log_print(ANDROID_LOG_DEBUG, "FPGA_device.c, ioctl cmd", "%s", message);
+    //android_log_print(ANDROID_LOG_DEBUG, "FPGA_device.c, ioctl cmd", "%s", message);
     // Perform the ioctl operation with the message string
     int result = ioctl(fd, COMMAND, message);
     if (result == -1) {

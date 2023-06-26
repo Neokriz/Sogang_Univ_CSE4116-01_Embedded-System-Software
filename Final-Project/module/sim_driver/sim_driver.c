@@ -213,7 +213,7 @@ void stm_write() {
 
 	value[0] = _car_rpm > 0 ? 1 : 0;
 	value[1] = 1;
-	value[2] = ((_car_rpm) * (-150) / 6300) + 150;
+	value[2] = ((_car_rpm) * (-130) / 6300) + 130;
 
     value_short = value[0] & 0xF;
     outw(value_short,(unsigned int)stm_addr);

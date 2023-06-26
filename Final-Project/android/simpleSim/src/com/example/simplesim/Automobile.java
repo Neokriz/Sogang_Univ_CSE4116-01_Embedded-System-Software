@@ -141,7 +141,7 @@ public class Automobile {
     	double finalDrive = GearRatio.FINAL.getValue();
     	//Log.d("GearRatio", ""+GearRatio.values()[this.gear+1].getValue());
     	//Log.d("FinalDrive", ""+finalDrive);
-    	if(gearRatio == 0) {
+    	if(gearRatio == 0 || this.pos == GearPos.P) {
     		this.speed = 0;
     	}
     	else {
