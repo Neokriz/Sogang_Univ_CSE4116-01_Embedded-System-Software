@@ -34,8 +34,20 @@ wait_queue_head_t wq_read;
 DECLARE_WAIT_QUEUE_HEAD(wq_read);
 
 // interrupt handlers...
+irqreturn_t inter_handler_HM(int irq, void* dev_id);
 irqreturn_t inter_handler_VP(int irq, void* dev_id);
 irqreturn_t inter_handler_VM(int irq, void* dev_id);
+
+irqreturn_t inter_handler_HM(int irq, void* dev_id) {
+	//printk(KERN_ALERT "ipnterrupt PW!!! = %x\n", gpio_get_value(IMX_GPIO_NR(1, 11)));
+	interruptNumber = 3;
+	if(interruptCount==1) {
+		interruptCount = 0;
+		__wake_up(&wq_read, 1, 1, NULL);	
+		printk("interrupt handler3\n");
+	}
+	return IRQ_HANDLED;
+}
 
 irqreturn_t inter_handler_VP(int irq, void* dev_id) {
 	//printk(KERN_ALERT "interrupt VP!!! = %x\n", gpio_get_value(IMX_GPIO_NR(2, 15)));
@@ -43,21 +55,22 @@ irqreturn_t inter_handler_VP(int irq, void* dev_id) {
 	if(interruptCount==1) {
 		interruptCount = 0;
 		__wake_up(&wq_read, 1, 1, NULL);	
-		printk("wake up1\n");
+		printk("interrupt handler1\n");
 	}
 	return IRQ_HANDLED;
 }
 
 irqreturn_t inter_handler_VM(int irq, void* dev_id) {
-	//printk(KERN_ALERT "interrupt VM... = %x\n", gpio_get_value(IMX_GPIO_NR(2, 15)));
+	//printk(KERN_ALERT "interrupt VM... = %x\n", gpio_get_value(IMX_GPIO_NR(5, 14)));
 	interruptNumber = 2;
 	if(interruptCount==1) {
 		interruptCount = 0;
 		__wake_up(&wq_read, 1, 1, NULL);	
-		printk("wake up2\n");
+		printk("interrupt handler2\n");
 	}
 	return IRQ_HANDLED;
 }
+
 
 // define file_operations structure 
 struct file_operations sim_int_fops = {
@@ -74,8 +87,14 @@ int sim_int_open(struct inode *minode, struct file *mfile) {
 	int irq;
 
 	if(sim_int_port_usage != 0) return -EBUSY;
-
 	sim_int_port_usage = 1;
+
+	// int3
+	gpio_request(IMX_GPIO_NR(1,11), "GPIO_home");
+	gpio_direction_input(IMX_GPIO_NR(1,11));
+	irq = gpio_to_irq(IMX_GPIO_NR(1,11));
+	printk(KERN_ALERT "IRQ Number : %d\n",irq);
+	ret=request_irq(irq, inter_handler_HM, IRQF_TRIGGER_FALLING, "home", 0);
 	
 	// int1
 	gpio_request(IMX_GPIO_NR(2,15), "GPIO_volup");
@@ -97,10 +116,12 @@ int sim_int_open(struct inode *minode, struct file *mfile) {
 // when sim interrupt device close, call this function
 int sim_int_release(struct inode *minode, struct file *mfile) {
 
-	free_irq(gpio_to_irq(IMX_GPIO_NR(2, 15)), NULL);
-	free_irq(gpio_to_irq(IMX_GPIO_NR(5, 14)), NULL);
+	free_irq(gpio_to_irq(IMX_GPIO_NR(2, 15)), NULL); // VP
+	free_irq(gpio_to_irq(IMX_GPIO_NR(5, 14)), NULL); // VM
+	free_irq(gpio_to_irq(IMX_GPIO_NR(1, 11)), NULL); // HM
 
 	sim_int_port_usage = 0;
+
 	return 0;
 }
 

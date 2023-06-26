@@ -259,7 +259,16 @@
         android:layout_toEndOf="@+id/gearMSBtn"
         android:layout_toRightOf="@+id/gearMSBtn"
         android:src="@drawable/rpm" />
-
+    <ImageView
+        android:id="@+id/rpm_background_glow"
+        android:layout_width="250dp"
+        android:layout_height="250sp"
+        android:layout_marginTop="4dp"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@+id/gearMSBtn"
+        android:layout_toRightOf="@+id/gearMSBtn"
+        android:src="@drawable/rpm_glow" />
+    
     <ImageView
         android:id="@+id/speed_background"
         android:layout_width="250dp"
@@ -270,7 +279,17 @@
         android:layout_toEndOf="@+id/rpm_background"
         android:layout_toRightOf="@+id/rpm_background"
         android:src="@drawable/speed" />
-
+    <ImageView
+        android:id="@+id/speed_background_glow"
+        android:layout_width="250dp"
+        android:layout_height="250dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="2dp"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@+id/rpm_background"
+        android:layout_toRightOf="@+id/rpm_background"
+        android:src="@drawable/speed_glow" />
+    
     <ImageView
         android:id="@+id/rpm_needle"
         android:layout_width="150dp"

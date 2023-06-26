@@ -72,12 +72,17 @@ public class Controller {
 		return ignitionProcess;
 	}
 	
-	public static int idle(Automobile car){
+	public static int idle(Automobile car, boolean brakeOn){
 		if(car.getEngineStat()) {
 			car.updateRpm(0);
 		}
 		else {
 			car.setRpm(0);
+		}
+		if(acceleratation == 0 && car.getGear() > 0 && car.getPos() != Automobile.GearPos.D) 
+			car.setGear(car.getGear() - 1);
+		if(brakeOn) {
+			car.setSpeed(car.getSpeed()*0.9);
 		}
 		return 0;
 	}
@@ -112,7 +117,7 @@ public class Controller {
 		return car.getGear();
 	}
 	
-	public static int accelerate(Automobile car, int input, int throttle) { //input is +1 or 0
+	public static int accelerate(Automobile car, int input, int throttle, boolean brakeOn) { //input is +1 or 0
 		//Log.d("accelerate called", ""+throttle);
 		int[] torque= {35, 35, 35, 38, 42,
 						45, 46, 47, 48, 47, 
@@ -121,21 +126,23 @@ public class Controller {
 		
 		int gwsPosition = car.getPos().ordinal();
 		double increment;
-		double ratio =  Automobile.GearRatio.values()[car.getGear()+1].getValue();
+		double ratio;
+		ratio =  Automobile.GearRatio.values()[car.getGear()+1].getValue();
 		if(input > 0) {
 			increment = input * ((double)throttle / 100) * ratio * torque[car.getRpm() / 320] / 20;
 			increment = (increment >= 1) ? increment : 0;
 			//Log.d("increment", ""+increment);
 		}
-		else {
+		// braking
+		else if(brakeOn){
 			increment = 5 * input;
 		}
+		// defualt slow dwon
+		else {
+			increment = 2 * input;
+		}
 		
-//		if(car.getRpm() < 770) { //TODO:FIX need
-//			acceleratation = 0;
-//		}
-		
-		if(car.getSpeed() < 300) {
+		if(car.getSpeed() < 280) {
 			//increase RPM
 			car.setRpm(car.getRpm()+(int)increment);
 			if(gwsPosition == Automobile.GearPos.D.ordinal()) {
@@ -153,15 +160,19 @@ public class Controller {
 	}
 	
 	public static void deceleratation(Automobile car, boolean brakeOn) {
-		if(brakeOn) {
-			accelerate(car, -1, 100);
+		if(brakeOn && car.getRpm() > 770) {
+			accelerate(car, -1, 100, brakeOn);
+		}
+		else {
+			idle(car, brakeOn);
+			car.setSpeed(car.getSpeed()*0.9);
 		}
 		
 	}
 	
 	public static void driveMode(Automobile car, int throttle, boolean accel) {
 		//Log.d("driveMode, throttle:", ""+throttle);
-		int row = throttle / 10;
+		int row = throttle / 10 - 1;//throttle == 100 ? 9 : throttle / 10;
 		int column = 0;  //gear value is between 1 to 8;
 		double weightVal = (throttle % 10) * 0.1;
 		int carGear = car.getGear();
@@ -169,6 +180,7 @@ public class Controller {
 		int shiftRpm = 9999;
 		int plusRpm = 0;
 
+		if(row < 0) row = 0;
 		//accel == true, up shift
 		if(accel == true && carGear < 8) {
 			column = carGear - 1;
@@ -195,7 +207,7 @@ public class Controller {
 			shiftRpm = ShiftPatternTable.getDownValue(row, column);
 
 			if(weightVal != 0) {
-				plusRpm = (int)(weightVal * (ShiftPatternTable.getDownValue(row + 1, column) - shiftRpm));
+				plusRpm = (int)(weightVal * (ShiftPatternTable.getDownValue(row, column) - shiftRpm));
 			}
 			if(carRpm <= (shiftRpm + plusRpm)) {
 				car.setGear(carGear - 1);

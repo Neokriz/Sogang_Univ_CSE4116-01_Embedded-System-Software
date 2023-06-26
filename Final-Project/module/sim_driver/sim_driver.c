@@ -15,7 +15,6 @@ AUTH : neo7k@sogang.ac.kr */
 
 #include <asm/io.h>
 #include <asm/uaccess.h>
-#include <asm/irq.h>
 #include <asm/param.h>
 #include <mach/gpio.h>
 
@@ -206,21 +205,30 @@ void dot_write() {
 void stm_write() {
 	char value[3];
 	unsigned short value_short = 0;
-	int input_range, motor_range;
-
-	input_range = 6500;
-	motor_range = 250;
+	//int input_range, motor_range;
 
 	value[0] = _car_rpm > 0 ? 1 : 0;
-	value[1] = 1;
-	value[2] = ((_car_rpm) * (-130) / 6300) + 130;
+	// spin motor match to rpm value
+	if(_car_speed == 0) {
+		//input_range = 6300;
+		//motor_range = 250 - 130;
+		value[1] = 1;
+		value[2] = ((_car_rpm) * (-130) / 6300) + 130;
+	}
+	// spin motor match to speed value
+	else {
+		//input_range = 280;
+		//motor_range = 250 - 230;
+		value[1] = _car_gear == 'R' ? 0 : 1;
+		value[2] = ((_car_speed) * (-230) / 280) + 230;
+	}
 
-    value_short = value[0] & 0xF;
-    outw(value_short,(unsigned int)stm_addr);
-    value_short = value[1] & 0xF;
-    outw(value_short,(unsigned int)stm_addr + 2);
-    value_short = value[2] & 0xFF;
-    outw(value_short,(unsigned int)stm_addr + 4);	
+		value_short = value[0] & 0xF;
+		outw(value_short,(unsigned int)stm_addr);
+		value_short = value[1] & 0xF;
+		outw(value_short,(unsigned int)stm_addr + 2);
+		value_short = value[2] & 0xFF;
+		outw(value_short,(unsigned int)stm_addr + 4);	
 }
 
 // when read to sim device, call this function

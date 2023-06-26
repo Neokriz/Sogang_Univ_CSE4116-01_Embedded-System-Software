@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- settings_layout.xml -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <!-- Gear position input fields -->
+    <EditText
+        android:id="@+id/edit_gear_reverse"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Reverse" />
+
+    <EditText
+        android:id="@+id/edit_gear_1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Gear 1" />
+
+    <EditText
+        android:id="@+id/edit_gear_2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Gear 2" />
+
+    <EditText
+        android:id="@+id/edit_gear_3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Gear 3" />
+
+    <!-- Add more EditText fields for Gear 4, Gear 5, Gear 6, Gear 7, and Gear 8 -->
+    <EditText
+        android:id="@+id/edit_gear_4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Gear 4" />
+
+    <EditText
+        android:id="@+id/edit_gear_5"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Gear 5" />
+
+    <EditText
+        android:id="@+id/edit_gear_6"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Gear 6" />
+
+    <EditText
+        android:id="@+id/edit_gear_7"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Gear 7" />
+
+    <EditText
+        android:id="@+id/edit_gear_8"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Gear 8" />
+
+    <!-- Save button -->
+    <Button
+        android:id="@+id/button_save"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Save" />
+</LinearLayout>

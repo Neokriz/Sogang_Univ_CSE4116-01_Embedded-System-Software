@@ -448,20 +448,14 @@ deps_/home/embe/20171660/Project/source/module/sim_driver/sim_driver.o := \
   /work/achroimx_kernel/arch/arm/include/asm/uaccess.h \
   /work/achroimx_kernel/arch/arm/include/asm/unified.h \
     $(wildcard include/config/arm/asm/unified.h) \
-  /work/achroimx_kernel/arch/arm/include/asm/irq.h \
-  arch/arm/plat-mxc/include/mach/irqs.h \
-    $(wildcard include/config/mxc/tzic.h) \
-    $(wildcard include/config/arm/gic.h) \
-    $(wildcard include/config/soc/imx53.h) \
-    $(wildcard include/config/soc/imx50.h) \
-    $(wildcard include/config/soc/imx51.h) \
-    $(wildcard include/config/mach/mx31ads/wm1133/ev1.h) \
-    $(wildcard include/config/mx3/ipu/irqs.h) \
   arch/arm/plat-mxc/include/mach/gpio.h \
   arch/arm/plat-mxc/include/mach/hardware.h \
   arch/arm/plat-mxc/include/mach/mxc.h \
     $(wildcard include/config/soc/imx6q.h) \
     $(wildcard include/config/soc/imx37.h) \
+    $(wildcard include/config/soc/imx50.h) \
+    $(wildcard include/config/soc/imx51.h) \
+    $(wildcard include/config/soc/imx53.h) \
   arch/arm/plat-mxc/include/mach/mx6.h \
   include/asm-generic/gpio.h \
     $(wildcard include/config/gpiolib.h) \
@@ -483,6 +477,12 @@ deps_/home/embe/20171660/Project/source/module/sim_driver/sim_driver.o := \
     $(wildcard include/config/ftrace/nmi/enter.h) \
   /work/achroimx_kernel/arch/arm/include/asm/hardirq.h \
     $(wildcard include/config/local/timers.h) \
+  /work/achroimx_kernel/arch/arm/include/asm/irq.h \
+  arch/arm/plat-mxc/include/mach/irqs.h \
+    $(wildcard include/config/mxc/tzic.h) \
+    $(wildcard include/config/arm/gic.h) \
+    $(wildcard include/config/mach/mx31ads/wm1133/ev1.h) \
+    $(wildcard include/config/mx3/ipu/irqs.h) \
   include/linux/irq_cpustat.h \
   include/linux/hrtimer.h \
     $(wildcard include/config/high/res/timers.h) \

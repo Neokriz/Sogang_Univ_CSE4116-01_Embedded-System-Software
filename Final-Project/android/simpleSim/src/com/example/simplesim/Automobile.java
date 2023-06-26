@@ -33,7 +33,7 @@ public class Automobile {
 	
 	public enum GearRatio {
 	    R(3.297),
-	    N(1.0),
+	    N(15.0),
 	    ONE(4.696),
 	    TWO(3.130),
 	    THREE(2.104),
@@ -170,5 +170,9 @@ public class Automobile {
     public void updateRpm(double speed) {
     	this.rpm = calculateRpm(speed);
     }
+	public void setSpeed(double speed) {
+		// TODO Auto-generated method stub
+		this.speed = speed;
+	}
 
 }

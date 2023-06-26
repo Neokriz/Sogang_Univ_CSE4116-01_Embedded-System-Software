@@ -37,7 +37,7 @@ import android.widget.ToggleButton;
 public class MainActivity extends ActionBarActivity {
 	public static DeviceController devCtrl = new DeviceController();
 	public static int fd, fd2;
-	public static String[] testData = new String[3];
+	public static String[] fpgaData = new String[3];
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -108,6 +108,7 @@ public class MainActivity extends ActionBarActivity {
 		int gearPos_idx = myCar.getPos().ordinal();
 		int guage = 0;
 		int interruptGearChange = 0;
+		boolean simulateRPM = true;
 		boolean brakeOn = false;
 		public PlaceholderFragment() {
 		}
@@ -134,7 +135,7 @@ public class MainActivity extends ActionBarActivity {
 			
 			final Button gearUpBtn = (Button) rootView.findViewById(R.id.gearUpBtn);
 			final Button gearDownBtn = (Button) rootView.findViewById(R.id.gearDownBtn);
-			Button gearMSBtn = (Button) rootView.findViewById(R.id.new_gearMSBtn);
+			final Button gearMSBtn = (Button) rootView.findViewById(R.id.new_gearMSBtn);
 			Button dummy_gearMSBtn = (Button) rootView.findViewById(R.id.gearMSBtn);
 			ToggleButton ignBtn = (ToggleButton) rootView.findViewById(R.id.ignitionBtn);
 			Button throttleBtn = (Button) rootView.findViewById(R.id.throttleBtn);
@@ -147,10 +148,16 @@ public class MainActivity extends ActionBarActivity {
 			final ImageView brakePedal = (ImageView) rootView.findViewById(R.id.brake_img);
 			final ImageView engineBtn_blue = (ImageView) rootView.findViewById(R.id.engine_button_blue);
 			final ImageView brakeLamp_off = (ImageView) rootView.findViewById(R.id.brake_lamp_off);
-			
+			final ImageView rpmMeter = (ImageView) rootView.findViewById(R.id.rpm_background);
+			final ImageView speedMeter = (ImageView) rootView.findViewById(R.id.speed_background);
+			final ImageView rpmMeterGlow = (ImageView) rootView.findViewById(R.id.rpm_background_glow);
+			final ImageView speedMeterGlow = (ImageView) rootView.findViewById(R.id.speed_background_glow);
+
 			engineBtn_blue.setVisibility(View.INVISIBLE);
 			dummy_gearMSBtn.setVisibility(View.INVISIBLE);
-			
+			//rpmMeterGlow.setVisibility(View.INVISIBLE);
+			speedMeterGlow.setVisibility(View.INVISIBLE);
+
 			brakeLamp_off.setColorFilter(Color.argb(10, 0, 0, 0));
 			
 			// Gear Up button 
@@ -321,7 +328,6 @@ public class MainActivity extends ActionBarActivity {
 						}
 	            	}
 	            }
-
 	            @Override
 	            public void onStartTrackingTouch(SeekBar seekBar) {
 	                // Handle seek bar touch start
@@ -338,6 +344,22 @@ public class MainActivity extends ActionBarActivity {
 	            	seekBar.setProgress(0);
 	            }
 	        });
+			rpmMeter.setOnClickListener(new View.OnClickListener() {
+			    @Override
+			    public void onClick(View v) {
+			    	rpmMeterGlow.setVisibility(View.VISIBLE);
+			    	speedMeterGlow.setVisibility(View.INVISIBLE);
+			    	simulateRPM = true;
+			    }
+			});
+			speedMeter.setOnClickListener(new View.OnClickListener() {
+			    @Override
+			    public void onClick(View v) {
+			    	speedMeterGlow.setVisibility(View.VISIBLE);
+			    	rpmMeterGlow.setVisibility(View.INVISIBLE);
+			    	simulateRPM = false;
+			    }
+			});
 			
 			//////////////////////////////////////////////////////////////////////////////////////
 			
@@ -355,16 +377,16 @@ public class MainActivity extends ActionBarActivity {
 						Controller.deceleratation(myCar, brakeOn);
 					}
 					else if(myController.getAcceleratation() == 1) {
-						Controller.accelerate(myCar, 1, guage);
+						Controller.accelerate(myCar, 1, guage, brakeOn);
 					}
 					else if(myController.getAcceleratation() == 0) {
 						if(myCar.getRpm() < 770){
-							Controller.idle(myCar);
+							Controller.idle(myCar, brakeOn);
 						}
-						Controller.accelerate(myCar, -1, guage);
+						Controller.accelerate(myCar, -1, guage, brakeOn);
 					}
 					else {
-						Controller.idle(myCar);
+						Controller.idle(myCar, brakeOn);
 					}
 					rpmHandler.postDelayed(this, 10);
 					
@@ -384,15 +406,15 @@ public class MainActivity extends ActionBarActivity {
 					float rotationAngle2 = (((float)speedAngle - 0) / (300 - 5)) * (280 - 5) + 5;
 					speedNeedle.setRotation(rotationAngle2);
 					//throttleBar.setProgress((int)myCar.getSpeed());
-					//Log.d("testData speed", ""+myCar.getSpeed());
+					//Log.d("fpgaData speed", ""+myCar.getSpeed());
 				    
-				    testData[0] = String.valueOf(myCar.getRpm());
-				    testData[1] =  String.valueOf((int)(myCar.getSpeed()));
-				    testData[2] = (myCar.getPos() == Automobile.GearPos.M ? 
+				    fpgaData[0] = String.valueOf(myCar.getRpm());
+				    fpgaData[1] = simulateRPM ? String.valueOf(0) : String.valueOf((int)(myCar.getSpeed()));
+				    fpgaData[2] = (myCar.getPos() == Automobile.GearPos.M ? 
 				    		String.valueOf(myCar.getGear()) : 
 				    		String.valueOf(myCar.getPos()));
-				    //Log.d("testData", ""+testData[0]+"__"+testData[1]+"__"+testData[2]);
-					devCtrl.ioctlSetSim(fd, testData);
+				    //Log.d("fpgaData", ""+fpgaData[0]+"__"+fpgaData[1]+"__"+fpgaData[2]);
+					devCtrl.ioctlSetSim(fd, fpgaData);
 					
 					//Gear change by interrupt button
 			        if(interruptGearChange == 1) {
@@ -401,6 +423,10 @@ public class MainActivity extends ActionBarActivity {
 			        }
 			        else if(interruptGearChange == 2) {
 			        	gearUpBtn.performClick();
+			        	interruptGearChange = 0;
+			        }
+			        else if(interruptGearChange == 3) {
+			        	gearMSBtn.performClick();
 			        	interruptGearChange = 0;
 			        }
 			   
