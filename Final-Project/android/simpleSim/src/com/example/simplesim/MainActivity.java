@@ -18,6 +18,7 @@ import android.support.v4.app.Fragment;
 //import android.annotation.SuppressLint;
 //import android.content.Context;
 //import android.content.res.Resources;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -81,10 +82,18 @@ public class MainActivity extends ActionBarActivity {
 		// automatically handle clicks on the Home/Up button, so long
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
-		if (id == R.id.action_settings) {
-			return true;
-		}
-		return super.onOptionsItemSelected(item);
+
+        if (id == R.id.action_settings) {
+            // Navigate to the SettingFragment when the "Settings" button is clicked
+            Fragment settingFragment = new SettingFragment();
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.container, settingFragment);
+            transaction.addToBackStack(null);  // Add to back stack to enable back navigation
+            transaction.commit();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
 	}
 
 	/**
@@ -103,7 +112,7 @@ public class MainActivity extends ActionBarActivity {
 		Handler intHandler;
 		Runnable intRunnable;
 		
-		Automobile myCar = new Automobile();
+		Automobile myCar = CarManager.getMyCar();
 		Controller myController = new Controller();
 		int gearPos_idx = myCar.getPos().ordinal();
 		int guage = 0;
@@ -232,7 +241,7 @@ public class MainActivity extends ActionBarActivity {
 							gearPos_idx = Controller.gearChange(myCar, gearPos_idx, +1);
 						}
 						else if(gearPos_idx == Automobile.GearPos.M.ordinal()){
-							gearPos_idx = Controller.gearChange(myCar, gearPos_idx, -1);
+							gearPos_idx = Controller.gearChange(myCar, gearPos_idx, -1);//TODO
 						}
 						Log.d("gearManual", ""+gearPos_idx);
 						//printGear(v, gearPositon, gearPos_idx);

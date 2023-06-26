@@ -214,6 +214,8 @@ void stm_write() {
 		//motor_range = 250 - 130;
 		value[1] = 1;
 		value[2] = ((_car_rpm) * (-130) / 6300) + 130;
+		if(value[2] <= 0)
+			value[2] = 1;
 	}
 	// spin motor match to speed value
 	else {
@@ -221,6 +223,8 @@ void stm_write() {
 		//motor_range = 250 - 230;
 		value[1] = _car_gear == 'R' ? 0 : 1;
 		value[2] = ((_car_speed) * (-230) / 280) + 230;
+		if(value[2] <= 0)
+			value[2] = 1;
 	}
 
 		value_short = value[0] & 0xF;

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- settings_layout.xml -->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Gear position input fields -->
+    <EditText
+        android:id="@+id/edit_gear_reverse"
+        android:layout_width="240dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:hint="Gear R (default: 3.297)" />
+
+    <EditText
+        android:id="@+id/edit_gear_1"
+        android:layout_width="240dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/edit_gear_reverse"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:hint="Gear 1 (default: 4.696)" />
+
+    <EditText
+        android:id="@+id/edit_gear_2"
+        android:layout_width="240dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/edit_gear_1"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:hint="Gear 2 (default: 3.130)" />
+
+    <EditText
+        android:id="@+id/edit_gear_3"
+        android:layout_width="240dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/edit_gear_2"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:hint="Gear 3 (default: 2.104)" />
+
+    <EditText
+        android:id="@+id/edit_gear_4"
+        android:layout_width="240dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/edit_gear_3"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:hint="Gear 4 (default: 1.667)" />
+
+    <EditText
+        android:id="@+id/edit_gear_5"
+        android:layout_width="240dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/edit_gear_4"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:hint="Gear 5 (default: 1.285)" />
+
+    <EditText
+        android:id="@+id/edit_gear_6"
+        android:layout_width="240dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/edit_gear_5"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:hint="Gear 6 (default: 1.000)" />
+
+    <EditText
+        android:id="@+id/edit_gear_7"
+        android:layout_width="240dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/edit_gear_6"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:hint="Gear 7 (default: 0.839)" />
+
+    <EditText
+        android:id="@+id/edit_gear_8"
+        android:layout_width="240dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/edit_gear_7"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:hint="Gear 8 (default: 0.667)" />
+
+    <EditText
+        android:id="@+id/edit_final_drive"
+        android:layout_width="240dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/edit_gear_8"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:hint="Final Drive (default: 2.563)" />
+
+    <Button
+        android:id="@+id/button_save"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/edit_final_drive"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="16dp"
+        android:text="Save" />
+
+    <ImageView
+        android:id="@+id/zf_8hp"
+        android:layout_width="800dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:src="@drawable/zf_8hp" />
+
+    <Button
+        android:id="@+id/button_reset"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/button_save"
+        android:layout_alignBottom="@+id/button_save"
+        android:layout_toRightOf="@+id/button_save"
+        android:text="Reset" />
+
+</RelativeLayout>

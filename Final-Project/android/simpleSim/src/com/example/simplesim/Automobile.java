@@ -53,6 +53,10 @@ public class Automobile {
 	    public double getValue() {
 	        return value;
 	    }
+	    
+	    public void setValue(double value) {
+	        this.value = value;
+	    }
 	}
 
     public Automobile() {

@@ -79,7 +79,7 @@ public class Controller {
 		else {
 			car.setRpm(0);
 		}
-		if(acceleratation == 0 && car.getGear() > 0 && car.getPos() != Automobile.GearPos.D) 
+		if(acceleratation == 0 && car.getGear() > 0 && car.getPos() != Automobile.GearPos.D && car.getPos() != Automobile.GearPos.M) 
 			car.setGear(car.getGear() - 1);
 		if(brakeOn) {
 			car.setSpeed(car.getSpeed()*0.9);
@@ -129,7 +129,11 @@ public class Controller {
 		double ratio;
 		ratio =  Automobile.GearRatio.values()[car.getGear()+1].getValue();
 		if(input > 0) {
-			increment = input * ((double)throttle / 100) * ratio * torque[car.getRpm() / 320] / 20;
+			int idx = car.getRpm() / 320; 
+			if(idx > 20) {
+				idx = 19;
+			}
+			increment = input * ((double)throttle / 100) * ratio * torque[idx] / 20;
 			increment = (increment >= 1) ? increment : 0;
 			//Log.d("increment", ""+increment);
 		}

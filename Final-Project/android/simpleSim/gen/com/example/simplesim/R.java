@@ -1090,6 +1090,7 @@ containing a value of this type.
         public static final int rpm_glow=0x7f020060;
         public static final int speed=0x7f020061;
         public static final int speed_glow=0x7f020062;
+        public static final int zf_8hp=0x7f020063;
     }
     public static final class id {
         public static final int accel_img=0x7f05005c;
@@ -1104,7 +1105,7 @@ containing a value of this type.
         public static final int action_menu_divider=0x7f050016;
         public static final int action_menu_presenter=0x7f050017;
         public static final int action_mode_close_button=0x7f050024;
-        public static final int action_settings=0x7f050064;
+        public static final int action_settings=0x7f050071;
         public static final int activity_chooser_view_content=0x7f050025;
         public static final int always=0x7f05000b;
         public static final int beginning=0x7f050011;
@@ -1112,6 +1113,8 @@ containing a value of this type.
         public static final int brake_img=0x7f05005d;
         public static final int brake_lamp_off=0x7f050062;
         public static final int brake_lamp_on=0x7f050061;
+        public static final int button_reset=0x7f050070;
+        public static final int button_save=0x7f05006e;
         public static final int checkbox=0x7f05002d;
         public static final int collapseActionView=0x7f05000d;
         public static final int container=0x7f05003c;
@@ -1121,6 +1124,16 @@ containing a value of this type.
         public static final int dialog=0x7f05000e;
         public static final int disableHome=0x7f050008;
         public static final int dropdown=0x7f05000f;
+        public static final int edit_final_drive=0x7f05006d;
+        public static final int edit_gear_1=0x7f050065;
+        public static final int edit_gear_2=0x7f050066;
+        public static final int edit_gear_3=0x7f050067;
+        public static final int edit_gear_4=0x7f050068;
+        public static final int edit_gear_5=0x7f050069;
+        public static final int edit_gear_6=0x7f05006a;
+        public static final int edit_gear_7=0x7f05006b;
+        public static final int edit_gear_8=0x7f05006c;
+        public static final int edit_gear_reverse=0x7f050064;
         public static final int edit_query=0x7f050030;
         public static final int end=0x7f050013;
         public static final int engine_button_blue=0x7f050060;
@@ -1193,6 +1206,7 @@ containing a value of this type.
         public static final int up=0x7f050021;
         public static final int useLogo=0x7f050003;
         public static final int withText=0x7f05000c;
+        public static final int zf_8hp=0x7f05006f;
     }
     public static final class integer {
         /**  The maximum number of action buttons that should be permitted within
@@ -1246,7 +1260,8 @@ containing a value of this type.
         public static final int abc_simple_decor=0x7f030017;
         public static final int activity_main=0x7f030018;
         public static final int fragment_main=0x7f030019;
-        public static final int support_simple_spinner_dropdown_item=0x7f03001a;
+        public static final int settings_layout=0x7f03001a;
+        public static final int support_simple_spinner_dropdown_item=0x7f03001b;
     }
     public static final class menu {
         public static final int main=0x7f0c0000;
