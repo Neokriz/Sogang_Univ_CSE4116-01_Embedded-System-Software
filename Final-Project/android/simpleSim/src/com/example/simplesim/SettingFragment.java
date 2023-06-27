@@ -79,20 +79,22 @@ public class SettingFragment extends Fragment {
                     e.printStackTrace();
                     // Handle the case where the input is not a valid number
                 }
-                gearRatios[i] = ratio;
+                if(ratio != 0) {
+                	gearRatios[i] = ratio / 1000.0;
+                }
             }
         }
         // Set the gear ratios in the GearRatio enum
-		GearRatio.R.setValue(gearRatios[0]);
-		GearRatio.ONE.setValue(gearRatios[1]);
-		GearRatio.TWO.setValue(gearRatios[2]);
-		GearRatio.THREE.setValue(gearRatios[3]);
-		GearRatio.FOUR.setValue(gearRatios[4]);
-		GearRatio.FIVE.setValue(gearRatios[5]);
-		GearRatio.SIX.setValue(gearRatios[6]);
-		GearRatio.SEVEN.setValue(gearRatios[7]);
-		GearRatio.EIGHT.setValue(gearRatios[8]);
-		GearRatio.FINAL.setValue(gearRatios[9]);
+		if(gearRatios[0] != 0) GearRatio.R.setValue(gearRatios[0]);
+		if(gearRatios[1] != 0)GearRatio.ONE.setValue(gearRatios[1]);
+		if(gearRatios[2] != 0)GearRatio.TWO.setValue(gearRatios[2]);
+		if(gearRatios[3] != 0)GearRatio.THREE.setValue(gearRatios[3]);
+		if(gearRatios[4] != 0)GearRatio.FOUR.setValue(gearRatios[4]);
+		if(gearRatios[5] != 0)GearRatio.FIVE.setValue(gearRatios[5]);
+		if(gearRatios[6] != 0)GearRatio.SIX.setValue(gearRatios[6]);
+		if(gearRatios[7] != 0)GearRatio.SEVEN.setValue(gearRatios[7]);
+		if(gearRatios[8] != 0)GearRatio.EIGHT.setValue(gearRatios[8]);
+		if(gearRatios[9] != 0)GearRatio.FINAL.setValue(gearRatios[9]);
 
         // Show a toast message or perform any other desired actions to indicate successful saving
         Toast.makeText(getActivity(), "Gear ratios saved successfully", Toast.LENGTH_SHORT).show();
