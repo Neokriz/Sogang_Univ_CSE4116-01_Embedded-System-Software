@@ -20,6 +20,21 @@
     <string name="ignition">IGN</string> 
     <string name="rpm_display">RPM+</string> 
     <string name="throttle">Throttle</string>           
-    <string name="brake">Brake</string>                    
+    <string name="brake">Brake</string>
+    <string name="debug1">+/-</string>        
+    <string name="debug2">%</string>         
+    <string name="save">Save</string>        
+    <string name="reset">Reset</string>        
+    <string name="Gear_R">Gear R (default: 3.297)</string>         
+    <string name="Gear_1">Gear 1 (default: 4.696)</string>        
+    <string name="Gear_2">Gear 2 (default: 3.130)</string>        
+    <string name="Gear_3">Gear 3 (default: 2.104)</string>        
+    <string name="Gear_4">Gear 4 (default: 1.667)</string>        
+    <string name="Gear_5">Gear 5 (default: 1.285)</string>        
+    <string name="Gear_6">Gear 6 (default: 1.000)</string>        
+    <string name="Gear_7">Gear 7 (default: 0.839)</string>        
+    <string name="Gear_8">Gear 8 (default: 0.667)</string>        
+    <string name="Final_Drive">Final Drive (default: 2.563)</string>          
+
 
 </resources>

@@ -1,14 +1,32 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mainFragRelativelayout"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingStart="@dimen/activity_horizontal_margin"
+    android:paddingEnd="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.example.simplesim.MainActivity$PlaceholderFragment" >
+    
+    <TextView
+        android:id="@+id/debugTextView1"
+        android:layout_width="20dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/debugTextView2"
+        android:text="@string/debug1" />
 
+    <TextView
+        android:id="@+id/debugTextView2"
+        android:layout_width="40dp"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/debugTextView1"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/accel_img"
+        android:text="@string/debug2" />
+    
     <TextView
         android:id="@+id/gearPTextView"
         android:layout_width="50dp"
@@ -39,7 +57,7 @@
         android:layout_marginTop="20dp"
         android:text="@string/gear_up"
         android:visibility="invisible" />
-    
+
     <Button
         android:id="@+id/gearMSBtn"
         android:layout_width="90dp"
@@ -49,7 +67,6 @@
         android:layout_marginTop="20dp"
         android:text="@string/gear_shift"
         android:visibility="invisible" />
-    
 
     <View
         android:id="@+id/linePtoR"
@@ -68,8 +85,8 @@
         android:layout_below="@+id/linePtoR"
         android:text="@string/str_R"
         android:textSize="50sp" />
-    
-     <View
+
+    <View
         android:id="@+id/lineRtoN"
         android:layout_width="4dp"
         android:layout_height="30dp"
@@ -86,8 +103,8 @@
         android:layout_below="@+id/lineRtoN"
         android:text="@string/str_N"
         android:textSize="50sp" />
-    
-     <View
+
+    <View
         android:id="@+id/lineNtoD"
         android:layout_width="4dp"
         android:layout_height="30dp"
@@ -95,7 +112,7 @@
         android:layout_below="@+id/gearNTextView"
         android:layout_marginStart="14dp"
         android:background="#000000" />
-     
+
     <TextView
         android:id="@+id/gearDTextView"
         android:layout_width="100dp"
@@ -136,7 +153,7 @@
         android:layout_marginTop="84dp"
         android:text="@string/str_plus"
         android:textSize="50sp" />
-    
+
     <TextView
         android:id="@+id/gearMinusTextView"
         android:layout_width="100dp"
@@ -177,15 +194,15 @@
         android:gravity="end"
         android:text="@string/rpm_display"
         android:textSize="40sp" />
-        
+
     <TextView
         android:id="@+id/gearDptextView"
         android:layout_width="40dp"
         android:layout_height="wrap_content"
         android:layout_alignBaseline="@+id/rpmDptextView"
         android:layout_alignBottom="@+id/rpmDptextView"
-        android:layout_toEndOf="@+id/rpmDptextView"
         android:layout_marginStart="30dp"
+        android:layout_toEndOf="@+id/rpmDptextView"
         android:gravity="center"
         android:text="@string/str_zero"
         android:textSize="40sp" />
@@ -234,81 +251,69 @@
         android:text="@string/str_kmh"
         android:textSize="20sp" />
 
-    <TextView
-        android:id="@+id/debugTextView1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/gearDownBtn"
-        android:layout_alignParentStart="true"
-        android:text="debug1" />
-
-    <TextView
-        android:id="@+id/debugTextView2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignStart="@+id/debugTextView1"
-        android:layout_below="@+id/debugTextView1"
-        android:text="debug2" />
-
     <ImageView
         android:id="@+id/rpm_background"
+        android:contentDescription="@null"
         android:layout_width="250dp"
         android:layout_height="250sp"
-        android:layout_marginTop="4dp"
         android:layout_alignParentTop="true"
+        android:layout_marginTop="4dp"
         android:layout_toEndOf="@+id/gearMSBtn"
-        android:layout_toRightOf="@+id/gearMSBtn"
         android:src="@drawable/rpm" />
+
     <ImageView
         android:id="@+id/rpm_background_glow"
+        android:contentDescription="@null"
         android:layout_width="250dp"
         android:layout_height="250sp"
-        android:layout_marginTop="4dp"
         android:layout_alignParentTop="true"
+        android:layout_marginTop="4dp"
         android:layout_toEndOf="@+id/gearMSBtn"
-        android:layout_toRightOf="@+id/gearMSBtn"
         android:src="@drawable/rpm_glow" />
-    
+
     <ImageView
         android:id="@+id/speed_background"
+        android:contentDescription="@null"
         android:layout_width="250dp"
         android:layout_height="250dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="2dp"
         android:layout_alignParentTop="true"
+        android:layout_marginEnd="2dp"
+        android:layout_marginTop="4dp"
         android:layout_toEndOf="@+id/rpm_background"
-        android:layout_toRightOf="@+id/rpm_background"
         android:src="@drawable/speed" />
+
     <ImageView
         android:id="@+id/speed_background_glow"
+        android:contentDescription="@null"
         android:layout_width="250dp"
         android:layout_height="250dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="2dp"
         android:layout_alignParentTop="true"
+        android:layout_marginEnd="2dp"
+        android:layout_marginTop="4dp"
         android:layout_toEndOf="@+id/rpm_background"
-        android:layout_toRightOf="@+id/rpm_background"
         android:src="@drawable/speed_glow" />
-    
+
     <ImageView
         android:id="@+id/rpm_needle"
+        android:contentDescription="@null"
         android:layout_width="150dp"
         android:layout_height="150dp"
         android:layout_alignBottom="@+id/lineRtoN"
-        android:layout_toRightOf="@+id/rpmDptextView"
+        android:layout_toEndOf="@+id/rpmDptextView"
         android:src="@drawable/needle2" />
 
     <ImageView
         android:id="@+id/speed_needle"
+        android:contentDescription="@null"
         android:layout_width="150dp"
         android:layout_height="150dp"
-        android:layout_alignLeft="@+id/brakeBtn"
+        android:layout_alignStart="@+id/brakeBtn"
         android:layout_alignTop="@+id/rpm_needle"
         android:src="@drawable/needle2" />
 
-
     <ImageView
         android:id="@+id/accel_img"
+        android:contentDescription="@null"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/kmhTextView"
@@ -319,12 +324,13 @@
 
     <ImageView
         android:id="@+id/brake_img"
+        android:contentDescription="@null"
         android:layout_width="100dp"
         android:layout_height="60dp"
         android:layout_alignBottom="@+id/brakeBtn"
-        android:layout_toRightOf="@+id/kmhTextView"
-        android:layout_marginTop="5dp"
         android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:layout_toEndOf="@+id/kmhTextView"
         android:src="@drawable/pedal_brake" />
 
     <com.example.simplesim.VerticalSeekBar
@@ -334,33 +340,39 @@
         android:layout_alignTop="@+id/lineRtoN"
         android:layout_toEndOf="@+id/throttleBtn"
         android:max="100" />
-    
+
     <ImageView
         android:id="@+id/engine_button_red"
+        android:contentDescription="@null"
         android:layout_width="80dp"
         android:layout_height="80dp"
         android:layout_alignBottom="@+id/lineDtoM1"
-        android:layout_toRightOf="@+id/gearUpBtn"
         android:layout_marginStart="2dp"
+        android:layout_toEndOf="@+id/gearUpBtn"
         android:src="@drawable/engine_start_red" />
+
     <ImageView
         android:id="@+id/engine_button_blue"
+        android:contentDescription="@null"
         android:layout_width="80dp"
         android:layout_height="80dp"
         android:layout_alignBottom="@+id/lineDtoM1"
-        android:layout_toEndOf="@+id/gearUpBtn"
         android:layout_marginStart="2dp"
+        android:layout_toEndOf="@+id/gearUpBtn"
         android:src="@drawable/engine_start_blue" />
 
     <ImageView
         android:id="@+id/brake_lamp_on"
+        android:contentDescription="@null"
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:layout_below="@+id/gearDownBtn"
         android:layout_toStartOf="@+id/gearUpBtn"
         android:src="@drawable/brake_lamp" />
+
     <ImageView
-        android:id="@+id/brake_lamp_off"
+        android:id="@+id/brake_lamp_off" 
+        android:contentDescription="@null"
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:layout_below="@+id/gearDownBtn"
@@ -371,10 +383,11 @@
         android:id="@+id/new_gearMSBtn"
         android:layout_width="90dp"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/debugTextView2"
         android:layout_alignStart="@+id/gearDownBtn"
         android:layout_alignTop="@+id/gearMSTextView"
         android:text="@string/gear_shift"
         android:visibility="invisible" />
- 
+
+
+
 </RelativeLayout>
